@@ -1,0 +1,190 @@
+Current Implementation: v.a.0.0.01
+
+Class Guess:
+    Need to run the program until the user decides to quit       [problem G.01]
+
+    Methods:
+        main loop                                                [problem G.01]
+
+    Attributes:
+        Menu
+
+    Problem G.01:
+        Need to loop the game until the user decides to
+        quit the program
+
+        Specifications:
+        way to determine when the user wants to quit             [problem M.01]
+        way to run the main part of the program                  ...
+        way to quit the program                                  ...
+
+        Basic Design:
+        use a polling loop to run the program until
+        the user decides to quit
+
+        Algorithm:
+        initialize the poll by asking the user if they want
+                to quit
+        while they don't want to quit
+            run the program
+            ask the user if they want to quit
+        quit the program
+
+
+class Menu:
+    Need to determine when the user wants to quit                [problem M.01]
+    Need to create a new game                                    [problem M.02]
+    way to determine if there's an incomplete game
+    way to toggle whether or not the "continue game"
+        option should be displayed
+
+    Methods:
+        M.mthd.01 get option:                                    [problem M.01]
+            Displays the menu to the terminal then waits
+            for the user to input a valid option then
+            returns that option as a string
+
+    Attributes
+        M.attr.01 - options:
+            A dictionary where the keys are input-option
+            strings and the values are option methods
+
+        M.attr.02 - option names:
+            A list of strings as option names to display
+
+    Problem M.01:
+        The user needs to be able to specify when they want
+        to play a game, when they want to continue their
+        game, when they want to change the settings of a
+        game, and when they want to quit the program.
+
+        i.e. Need to get a valid option from the user
+
+        Specifications:
+        a way to display the options to the user                 [__str__]
+        way to ask the user to choose one of the options         [raw_input]
+        way to portray and a function to call for the            {Attr M 01}
+                following options:
+            starting a new game                                  [aesthetics]
+            changing the settings of the game                    ...
+            quitting the program                                 ...
+            continuing the game                                  ...
+        a string representation of the menu                      ...
+        string for asking the user for input                     ...
+        string to let the user know their input is invalid       ...
+        way to clear the screen                                  [subprocess]
+
+        Basic Design:
+        display the menu and use a polling loop to wait for
+        the user to input a valid option using the
+        keys from the menu options attribute
+
+        Algorithm:
+        print the menu string to the terminal
+        ask the user to choose an option
+        while the option isn't in the menu options' keys
+            clear the screen
+            print the menu string to the terminal
+            let the user know their option isn't valid
+            ask the user to choose an option
+        return the chosen option
+
+    Problem M.02
+        Need to start a new game
+
+        Specifications:
+        Game class
+        game settings - menu property
+        game - guess property
+        way to clear the screen
+
+        Basic Design
+        create a new game instance and call its main loop
+
+        Algorithm
+        set the game attribute to a new instance of the
+                game class
+        clear the screen
+        call the game instance's main loop with the
+                settings attribute
+        set the game property to None
+
+
+
+
+
+Problem:
+Need to generate a random combination of a specified amount of numbers from a specified linear amount of numbers
+
+Specifications:
+integer amount for the length of a random sequence
+a linear integer sequence
+
+Basic Design:
+use a for loop to iterate through the linear integer sequence and append a random choice from it to a list dedicated as the random sequence
+
+Algorithm:
+for the length of the amount for the random sequence
+    append a random choice for the linear integer sequence to the
+    random sequence
+
+
+Problem:
+Need to get a guess from the user and check to make sure it's compatible
+
+Specifications:
+an input function to get a guess from the user
+a function to check the input to make sure it's compatible
+a function to convert a string into a list of integers
+
+Basic Design:
+use an initialized loop to get the user's guess and keep asking for it until
+it's compatible
+
+Algorithm:
+initialize the user's guess using an input function
+while the guess isn't compatible:
+    ask for the user's guess using the same input function
+
+
+Problem:
+Need to make sure the user's guess is exactly the length of combo_length and
+each component is in guess_range
+
+Specifications:
+linear integer sequence
+integer amount for the length of a random sequence
+string of integers
+function to convert a string into a list of integers
+
+Basic Design:
+use a try statement to convert the string into a list of integers
+use a for loop to check if each number is in the linear integer sequence
+if anything goes wrong it's not compatible, otherwise it is
+
+Algorithm:
+within a try-clause
+    initialize a list of integers as a conversion of the number-string
+    for each integer in the the length of the integer amount
+        assert that the integer is in the linear integer sequence
+if anything goes wrong
+    return false
+return true
+
+
+Problem:
+Need to convert a string of integers into a list of integers
+
+Specifications:
+A string of integers
+a function to split the string into a list of separate strings
+
+Basic Design:
+using a for-loop to iterate over each number in the split string,
+convert each number into an integer and append it to a list
+
+Algorithm:
+initialize an empty list for the converted integers
+for each integer-string in the split string of integers
+    append the converted integer to the integer-list
+return the integer-list
