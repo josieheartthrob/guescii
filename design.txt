@@ -1,13 +1,29 @@
 Current Implementation: v.a.0.0.01
 
+
+
 Class Guess:
-    Need to run the program until the user decides to quit       [problem G.01]
+    Need to run the program until the user decides to quit      [problem G.01]
 
     Methods:
-        main loop                                                [problem G.01]
+        G.Mthd.01 - main loop                                   [problem G.01]
+            Need to loop the game until the user decides to
+            quit the program
 
     Attributes:
-        Menu
+        G.Attr.01 - Menu
+            An instance of the menu class that controls
+            user input for everything outside of the
+            actual game
+
+        G.Attr.02 - Game
+            An instance of the game class that controls
+            user input for everything within the
+            actual game
+
+        G.Attr.03 - Default Settings
+            a dictionary that contains the default values
+            for the settings
 
     Problem G.01:
         Need to loop the game until the user decides to
@@ -31,6 +47,9 @@ Class Guess:
         quit the program
 
 
+
+
+
 class Menu:
     Need to determine when the user wants to quit                [problem M.01]
     Need to create a new game                                    [problem M.02]
@@ -39,10 +58,12 @@ class Menu:
         option should be displayed
 
     Methods:
-        M.mthd.01 get option:                                    [problem M.01]
+        M.Mthd.01 - get option:                                  [problem M.01]
             Displays the menu to the terminal then waits
             for the user to input a valid option then
             returns that option as a string
+
+        M.Mthd.02 - start game:
 
     Attributes
         M.attr.01 - options:
@@ -63,7 +84,7 @@ class Menu:
         Specifications:
         a way to display the options to the user                 [__str__]
         way to ask the user to choose one of the options         [raw_input]
-        way to portray and a function to call for the            {Attr M 01}
+        way to portray and a function to call for the            [Attr M.01]
                 following options:
             starting a new game                                  [aesthetics]
             changing the settings of the game                    ...
@@ -93,13 +114,14 @@ class Menu:
         Need to start a new game
 
         Specifications:
-        Game class
-        game settings - menu property
-        game - guess property
-        way to clear the screen
+        Game class                                              [Problem P.01]
+        game settings                                           [Attr P.02]
+        game                                                    [Attr G.02]
+        way to clear the screen                                 [subprocess]
 
         Basic Design
         create a new game instance and call its main loop
+        to play the game
 
         Algorithm
         set the game attribute to a new instance of the
@@ -113,78 +135,139 @@ class Menu:
 
 
 
-Problem:
-Need to generate a random combination of a specified amount of numbers from a specified linear amount of numbers
+class Game:
+    Need to play the game                                       [Problem P.01]
 
-Specifications:
-integer amount for the length of a random sequence
-a linear integer sequence
+    Methods:
+        P.Mthd.01 - Build Answer                                [Problem P.02]
+            creates a randomized string of letters based
+            off the settings
 
-Basic Design:
-use a for loop to iterate through the linear integer sequence and append a random choice from it to a list dedicated as the random sequence
+        P.Mthd.02 - Ask for Guess                               [Problem P.03]
+            ask the user for their guess and wait for
+            their input. if the input is invalid ask again
+            until it's valid
 
-Algorithm:
-for the length of the amount for the random sequence
-    append a random choice for the linear integer sequence to the
-    random sequence
+    Attributes:
+        P.Attr.01 - Answer
+            a string of random letters as long as the value
+            of the settings' combination length where each
+            letter is within the settings' guess-types
 
+        P.Attr.03 - Settings
+            A dictionary where each key is a string as the
+            name of the setting and each item is an
+            instance of the type needed for that setting
 
-Problem:
-Need to get a guess from the user and check to make sure it's compatible
+        P.Attr.03.a - Guess Types
+            A string of letters where each letter is each
+            sequential letter of the alphabet for as long
+            as the specified amount of guess types
 
-Specifications:
-an input function to get a guess from the user
-a function to check the input to make sure it's compatible
-a function to convert a string into a list of integers
+        P.Attr.03.b - Combination Length
+            An integer that represents the length of any
+            combination within a game instance
 
-Basic Design:
-use an initialized loop to get the user's guess and keep asking for it until
-it's compatible
+        P.Attr.03.c - Guesses
+            An integer that represents the amount of
+            guesses the user is allowed before they lose
+            the game
 
-Algorithm:
-initialize the user's guess using an input function
-while the guess isn't compatible:
-    ask for the user's guess using the same input function
+    Problem P.01
+        Need to start a new game based off the settings and
+        play it until the user wins or loses
 
+        SPECIFICATIONS
+        settings                                                [Attr P.02]
+        way to randomly create an answer combo                  [Problem P.02]
+        way to get a valid guess from the user                  [Problem P.03]
+        way to compare the guess with the answer                [Problem P.06]
 
-Problem:
-Need to make sure the user's guess is exactly the length of combo_length and
-each component is in guess_range
+    Problem P.02:
+        Need to generate a random combination of a
+        specified amount of numbers from a specified
+        linear amount of numbers
 
-Specifications:
-linear integer sequence
-integer amount for the length of a random sequence
-string of integers
-function to convert a string into a list of integers
+        Specifications:
+        a linear sequence to draw from                          [Attr P.02.a]
+        amount for the length of a random sequence              [Attr P.02.b]
+        way to randomly choose from a list                      [random]
 
-Basic Design:
-use a try statement to convert the string into a list of integers
-use a for loop to check if each number is in the linear integer sequence
-if anything goes wrong it's not compatible, otherwise it is
+        Basic Design:
+        use a for loop invariant to iterate through the
+        linear sequence and append a random choice from it
+        to a new list as the random sequence
 
-Algorithm:
-within a try-clause
-    initialize a list of integers as a conversion of the number-string
-    for each integer in the the length of the integer amount
-        assert that the integer is in the linear integer sequence
-if anything goes wrong
-    return false
-return true
+        Algorithm:
+        initialize the random sequence for the loop
+        for the length specified for the random sequence
+            append a random choice from the linear sequence
+                    to the random sequence
 
+    Problem P.03:
+        Need to get a guess from the user and check to make
+        sure it's compatible
 
-Problem:
-Need to convert a string of integers into a list of integers
+        Specifications:
+        way to represent the game                               [Problem P.05]
+        an input function to get a guess from the user          [raw_input]
+        a function to check the input to make sure it's         [Problem P.04]
+            compatible
+        way to clear the screen                                 [subprocess]
 
-Specifications:
-A string of integers
-a function to split the string into a list of separate strings
+        Basic Design:
+        use a polling loop to ask for the user's guess until
+        it's valid
 
-Basic Design:
-using a for-loop to iterate over each number in the split string,
-convert each number into an integer and append it to a list
+        Algorithm:
+        display the game
+        initialize the guess by asking the user for it
+        while the guess is invalid:
+            clear the screen
+            print the game
+            let the user know their guess was invalid and
+                    how to fix it
+            ask for the user's guess
+        return the user's guess
 
-Algorithm:
-initialize an empty list for the converted integers
-for each integer-string in the split string of integers
-    append the converted integer to the integer-list
-return the integer-list
+    Problem P.04:
+        Need to make sure the user's guess is valid
+
+        Specifications:
+        user's guess                                            [raw_input]
+        a linear sequence to draw from                          [Attr P.02.a]
+        amount for the length of a random sequence              [Attr P.02.b]
+
+        Basic Design:
+        within a try clause, make sure the user's guess is
+        exactly the combo-length and use a for loop to make
+        sure each character is in the guessing-letters
+
+        Algorithm:
+        try to run the following procedure
+            for each character in the user's guess
+                assert the character's are in the
+                        guessing-letters list from the
+                        settings dictionary
+            assert the length of the user's guess is the
+                    same as the combo-length from the
+                    settings dictionary
+        if anything goes wrong
+            return False
+        return True
+
+    Problem P.05:
+        Need to represent the game
+
+        Specifications:
+        guess types
+        guess length
+
+    Problem P.06:
+        Need to compare the user's guess to the answer
+
+        Specifications:
+        user's guess
+        answer                                                     [Attr P.01]
+
+        Basic Design:

@@ -1,7 +1,7 @@
 import random, test_guess, subprocess
 from menu import Menu
 
-class Guess(object):
+class Guesscii(object):
     """The main class that handles the program"""
 
     def __init__(self):
@@ -35,7 +35,7 @@ class Guess(object):
         self.game = None
 
 if __name__ == '__main__':
-    guess = Guess()
+    guess = Guescii()
     guess.main()
 
 
@@ -79,10 +79,10 @@ def play_game(settings):
 def customize_settings():
     """returns a settings dictionary"""
 
-    restore_defaults = raw_input("restore defaults? y | n")
+    restore_defaults = raw_input("restore defaults? y | n\n\n> ")
     while restore_defaults not in ("y", "n"):
         restore_defaults = raw_input(
-            "invalid input\nplease type \"y\" or \"n\": ")
+            "invalid input\nplease type \"y\" or \"n\":\n\n> ")
 
     if restore_defaults == "n":
         settings = {"guess types": 0, "combination length": 0, "guesses": 0}
