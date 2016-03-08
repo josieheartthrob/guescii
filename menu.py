@@ -21,9 +21,9 @@ class Menu(object):
         """Assumes parent is a guess object"""
         self.parent = parent
         self.options = {
-        "n": parent.play_game,
-        "s": change_the_settings,
-        "q": quit_the_program}
+            "n": parent.play_game,
+            "s": change_the_settings,
+            "q": quit_the_program}
 
         self.__option_names = Menu._option_names.copy()
 

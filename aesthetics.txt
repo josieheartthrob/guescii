@@ -12,7 +12,6 @@ Without doing any research here are some ideas on how to achieve simplicity:
 Menu
 
 
-
 [ Menu ]
 
 > n - new game
@@ -27,17 +26,15 @@ Menu
 Game
 
 
+[  a b c d e f  ]
 
+>    _ _ _ _    |
 
-[ a b c d e f ]
+     _ _ _ _    |
 
->   _ _ _ _    |
+     _ _ _ _    |
 
-    _ _ _ _    |
-
-    _ _ _ _    |
-
-    _ _ _ _    |
+     _ _ _ _    |
 
 > /m - menu
 > /q - quit

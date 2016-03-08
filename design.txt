@@ -73,6 +73,25 @@ class Menu:
         M.attr.02 - option names:
             A list of strings as option names to display
 
+        M.Attr.03 - Settings
+            A dictionary where each key is a string as the
+            name of the setting and each item is an
+            instance of the type needed for that setting
+
+        M.Attr.03.a - Guess Types
+            A string of letters where each letter is each
+            sequential letter of the alphabet for as long
+            as the specified amount of guess types
+
+        M.Attr.03.b - Combination Length
+            An integer that represents the length of any
+            combination within a game instance
+
+        M.Attr.03.c - Guesses
+            An integer that represents the amount of
+            guesses the user is allowed before they lose
+            the game
+
     Problem M.01:
         The user needs to be able to specify when they want
         to play a game, when they want to continue their
@@ -115,7 +134,7 @@ class Menu:
 
         Specifications:
         Game class                                              [Problem P.01]
-        game settings                                           [Attr P.02]
+        game settings                                           [Attr M.03]
         game                                                    [Attr G.02]
         way to clear the screen                                 [subprocess]
 
@@ -127,8 +146,8 @@ class Menu:
         set the game attribute to a new instance of the
                 game class
         clear the screen
-        call the game instance's main loop with the
-                settings attribute
+        call the game instance's main loop with a
+                settings dictionary
         set the game property to None
 
 
@@ -154,31 +173,12 @@ class Game:
             of the settings' combination length where each
             letter is within the settings' guess-types
 
-        P.Attr.03 - Settings
-            A dictionary where each key is a string as the
-            name of the setting and each item is an
-            instance of the type needed for that setting
-
-        P.Attr.03.a - Guess Types
-            A string of letters where each letter is each
-            sequential letter of the alphabet for as long
-            as the specified amount of guess types
-
-        P.Attr.03.b - Combination Length
-            An integer that represents the length of any
-            combination within a game instance
-
-        P.Attr.03.c - Guesses
-            An integer that represents the amount of
-            guesses the user is allowed before they lose
-            the game
-
     Problem P.01
         Need to start a new game based off the settings and
         play it until the user wins or loses
 
         SPECIFICATIONS
-        settings                                                [Attr P.02]
+        settings                                                [Attr M.03]
         way to randomly create an answer combo                  [Problem P.02]
         way to get a valid guess from the user                  [Problem P.03]
         way to compare the guess with the answer                [Problem P.06]
@@ -189,8 +189,8 @@ class Game:
         linear amount of numbers
 
         Specifications:
-        a linear sequence to draw from                          [Attr P.02.a]
-        amount for the length of a random sequence              [Attr P.02.b]
+        a linear sequence to draw from                          [Attr M.03.a]
+        amount for the length of a random sequence              [Attr M.03.b]
         way to randomly choose from a list                      [random]
 
         Basic Design:
@@ -235,8 +235,8 @@ class Game:
 
         Specifications:
         user's guess                                            [raw_input]
-        a linear sequence to draw from                          [Attr P.02.a]
-        amount for the length of a random sequence              [Attr P.02.b]
+        a linear sequence to draw from                          [Attr M.03.a]
+        amount for the length of a random sequence              [Attr M.03.b]
 
         Basic Design:
         within a try clause, make sure the user's guess is
@@ -260,14 +260,115 @@ class Game:
         Need to represent the game
 
         Specifications:
-        guess types
-        guess length
+        settings                                                [Attr M.03]
+
+        Basic Design:
+        Every line should be about the same length so if
+        one of the lines is short, extra spaces should be
+        formatted in. There are three dependencies so maybe
+        the problem should be broken down into 3 separate
+        problems
+
+        Representation should be updated every time input
+        is received from the user
+
+    Problem P.05.a:
+        need to compare two strings based on their lengths
+        and modify them based off the comparison
+
+        Specifications:
+        list of strings                                        [Problem P.05.c]
+        way to find the length of a string                      [len]
+        searching algorithm                                     [brute force]
+        method to handle the strings                           [Problem P.05.b]
+
+        Basic Design:
+        Use a tracker loop to find the longest from a list
+        of strings then modify the strings based off their
+        length relative to the longest
+
+        Algorithm:
+        initialize the longest string to an empty string
+        for each string in the list
+            if the string is longer than the longest
+                set the longest string to that string
+        initialize a list for modified strings
+        for each string in the list
+            modify the string so it's as long as the
+                    longest string and append it to the
+                    modified strings list
+        return the modified strings list
+
+    Problem P.05.b:
+        Need to compare the length of a string to a
+        specified length and put buffers on either side
+        based off the comparison
+
+        Specifications:
+        string to modify                                       [Problem P.05.a]
+        integer as a length                                     ...
+
+        Basic Design:
+        Determine the amount of spaces needed to buffer
+        each side of the string. Use control statements to
+        determine how to buffer each side of the string
+
+        Algorithm:
+        The specified length should be greater than the
+                string's current length
+        Initialize the buffer space as the result of
+                subtracting the length of the string from
+                the specified length and dividing that
+                number by 2 and use that number to make
+                spaces
+        put the buffer space between the last character and
+                the rest of the string
+        if the difference between the length of the string
+                and the specified length isn't divisible by 2
+            add one more space to the buffer space
+        if the string has a "[" or a ">" character at the
+                beginning
+            put the number buffer space between the first
+                    character and the rest of the string
+        otherwise add 1 more space than the buffer space to
+                the beginning of the string
+        return the resulting string
+
+    Problem P.05.c
+        Need to make a list of strings based off the
+        settings passed to the game
+
+        Specifications:
+        settings dictionary                                     [Attr M.03]
+        function that adds a space between every character      [string.replace]
+
+        Basic Design:
+        Use the settings dictionary combined with some for
+        loops to add the base-strings for the game
+        representation to a list
+
+        Algorithm:
+        initialize a list of base-strings
+        create a copy of the guess-types string from the
+                settings dictionary with spaces between
+                every character
+        and append the string to the base-strings list
+        for the amount specified by the guesses integer
+                from the settings dictionary
+            create a string by multiplying "_" by the
+                    amount specified by the combination
+                    length integer from the settings
+                    dictionary
+            add a space between each character
+            append the string to the base-strings list
+        return the base-strings list
+
 
     Problem P.06:
         Need to compare the user's guess to the answer
 
         Specifications:
         user's guess
-        answer                                                     [Attr P.01]
+        answer                                                  [Attr P.01]
 
         Basic Design:
