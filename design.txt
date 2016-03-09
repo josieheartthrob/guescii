@@ -11,17 +11,17 @@ Class Guess:
             quit the program
 
     Attributes:
-        G.Attr.01 - Menu
+        G.Attr.01 - Menu (immutable):
             An instance of the menu class that controls
             user input for everything outside of the
             actual game
 
-        G.Attr.02 - Game
+        G.Attr.02 - Game (mutable):
             An instance of the game class that controls
             user input for everything within the
             actual game
 
-        G.Attr.03 - Default Settings
+        G.Attr.03 - Default Settings (immutable):
             a dictionary that contains the default values
             for the settings
 
@@ -57,6 +57,33 @@ class Menu:
     way to toggle whether or not the "continue game"
         option should be displayed
 
+    Attributes
+        M.attr.01 - Options (immutable):
+            A dictionary where the keys are input-option
+            strings and the values are option methods
+
+        M.attr.02 - Option Names (immutable):
+            A list of strings as option names to display
+
+        M.Attr.03 - Settings (mutable):
+            A dictionary where each key is a string as the
+            name of the setting and each item is an
+            instance of the type needed for that setting
+
+        M.Attr.03.a - Guess Types (mutable):
+            A string of letters where each letter is each
+            sequential letter of the alphabet for as long
+            as the specified amount of guess types
+
+        M.Attr.03.b - Combination Length (mutable):
+            An integer that represents the length of any
+            combination within a game instance
+
+        M.Attr.03.c - Guesses (mutable):
+            An integer that represents the amount of
+            guesses the user is allowed before they lose
+            the game
+
     Methods:
         M.Mthd.01 - get option:                                  [problem M.01]
             Displays the menu to the terminal then waits
@@ -64,33 +91,6 @@ class Menu:
             returns that option as a string
 
         M.Mthd.02 - start game:
-
-    Attributes
-        M.attr.01 - options:
-            A dictionary where the keys are input-option
-            strings and the values are option methods
-
-        M.attr.02 - option names:
-            A list of strings as option names to display
-
-        M.Attr.03 - Settings
-            A dictionary where each key is a string as the
-            name of the setting and each item is an
-            instance of the type needed for that setting
-
-        M.Attr.03.a - Guess Types
-            A string of letters where each letter is each
-            sequential letter of the alphabet for as long
-            as the specified amount of guess types
-
-        M.Attr.03.b - Combination Length
-            An integer that represents the length of any
-            combination within a game instance
-
-        M.Attr.03.c - Guesses
-            An integer that represents the amount of
-            guesses the user is allowed before they lose
-            the game
 
     Problem M.01:
         The user needs to be able to specify when they want
@@ -157,6 +157,12 @@ class Menu:
 class Game:
     Need to play the game                                       [Problem P.01]
 
+    Attributes:
+        P.Attr.01 - Answer (immutable):
+            a string of random letters as long as the value
+            of the settings' combination length where each
+            letter is within the settings' guess-types
+
     Methods:
         P.Mthd.01 - Build Answer                                [Problem P.02]
             creates a randomized string of letters based
@@ -166,12 +172,6 @@ class Game:
             ask the user for their guess and wait for
             their input. if the input is invalid ask again
             until it's valid
-
-    Attributes:
-        P.Attr.01 - Answer
-            a string of random letters as long as the value
-            of the settings' combination length where each
-            letter is within the settings' guess-types
 
     Problem P.01
         Need to start a new game based off the settings and
@@ -261,6 +261,8 @@ class Game:
 
         Specifications:
         settings                                                [Attr M.03]
+        handlers for what to do with the data
+        mapping type to map user-data to handling methods
 
         Basic Design:
         Every line should be about the same length so if
@@ -272,40 +274,110 @@ class Game:
         Representation should be updated every time input
         is received from the user
 
-    Problem P.05.a:
+    Problem P.06:
+        Need to compare the user's guess to the answer
+
+        Specifications:
+        user's guess
+        answer                                                  [Attr P.01]
+
+        Basic Design:
+
+
+
+
+
+class Game Representation:
+    Stores all the information about what should be
+    displayed to the screen. Class should be mutable
+    (attributes should change) as the guesses displayed
+    change
+
+    Need to be able to update what's displayed every time       [Problem R.01]
+    the user enters data
+
+    Attributes:
+        R.Attr.01 - Header (immutable):
+            A string of the guess types to pick from that
+            displays at the top of the screen
+
+        R.Attr.02 - Base-Strings (immutable):
+            A list of formattable strings as each following
+            line under the header
+
+        R.Attr.03 - Guesses (mutable):
+            A multidimensional list where each inner item
+            is a string to format into the Base-Strings
+
+        R.Attr.04 - Options (static; immutable):
+            a string that represents the options the user
+            can enter
+
+    Methods:
+        R.Mthd.01 - Normalize Strings:
+            Uses a list of uneven base-strings and evens
+            them out to be stored in the header and
+            base-strings attributes
+
+        R.Mthd.02 - Find Longest String:
+            Finds the longest string from a list of strings.
+
+    Problem R.01:
+        Need to be able to update what's displayed every
+        time the user enters data
+
+        Specifications:
+        data from the user                                      [Problem P.05]
+        handler for the data
+
+    Problem R.02:
         need to compare two strings based on their lengths
         and modify them based off the comparison
 
         Specifications:
-        list of strings                                        [Problem P.05.c]
+        longest from a list of strings                          [Problem R.03]
+        method to handle the strings                            [Problem R.04]
+        list of strings                                         [Problem R.05]
         way to find the length of a string                      [len]
-        searching algorithm                                     [brute force]
-        method to handle the strings                           [Problem P.05.b]
 
         Basic Design:
-        Use a tracker loop to find the longest from a list
-        of strings then modify the strings based off their
-        length relative to the longest
+        Use sequential processing to modify the strings in
+        the list based off their length relative to the
+        longest string
+
+        Algorithm:
+        initialize a list for modified strings
+        for each string in the list of un-modified strings
+            if the string is shorter than the longest:
+                modify it so it's as long
+                append it to the modified-strings list
+        return the modified-strings list
+
+    Problem R.03:
+        need to find the longest string from a list of
+        strings and return it
+
+        Specifications:
+        way to find the length of a string                      [len]
+        searching algorithm                                     [brute force]
+
+        Basic Design:
+        Use sequential processing to find the longest
+        string from the list
 
         Algorithm:
         initialize the longest string to an empty string
         for each string in the list
             if the string is longer than the longest
                 set the longest string to that string
-        initialize a list for modified strings
-        for each string in the list
-            modify the string so it's as long as the
-                    longest string and append it to the
-                    modified strings list
-        return the modified strings list
 
-    Problem P.05.b:
+    Problem R.04:
         Need to compare the length of a string to a
         specified length and put buffers on either side
         based off the comparison
 
         Specifications:
-        string to modify                                       [Problem P.05.a]
+        string to modify                                        [Problem R.02]
         integer as a length                                     ...
 
         Basic Design:
@@ -334,7 +406,7 @@ class Game:
                 the beginning of the string
         return the resulting string
 
-    Problem P.05.c
+    Problem R.05
         Need to make a list of strings based off the
         settings passed to the game
 
@@ -352,23 +424,13 @@ class Game:
         create a copy of the guess-types string from the
                 settings dictionary with spaces between
                 every character
-        and append the string to the base-strings list
+        append the string to the base-strings list
         for the amount specified by the guesses integer
                 from the settings dictionary
-            create a string by multiplying "_" by the
+            create a string by multiplying "{} " by the
                     amount specified by the combination
                     length integer from the settings
                     dictionary
-            add a space between each character
+            cut off the end
             append the string to the base-strings list
         return the base-strings list
-
-
-    Problem P.06:
-        Need to compare the user's guess to the answer
-
-        Specifications:
-        user's guess
-        answer                                                  [Attr P.01]
-
-        Basic Design:

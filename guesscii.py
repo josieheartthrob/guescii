@@ -1,5 +1,6 @@
 import random, test_guess, subprocess
 from menu import Menu
+from game import Game
 
 class Guesscii(object):
     """The main class that handles the program"""
@@ -17,6 +18,9 @@ class Guesscii(object):
     def game(self, game):
         """Assumes game is a game.Game object or None
         Modifies the game property"""
+        if type(game) != Game:
+            raise TypeError
+
         self._game = game
 
     def main(self):
