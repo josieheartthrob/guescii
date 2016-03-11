@@ -158,10 +158,14 @@ class Game:
     Need to play the game                                       [Problem P.01]
 
     Attributes:
-        P.Attr.01 - Answer (immutable):
+        P.Attr.01 - Answer (immutable):                         [Problem P.02]
             a string of random letters as long as the value
             of the settings' combination length where each
             letter is within the settings' guess-types
+
+        P.Attr.02 - Answer Character Count Map (immutable):     [Problem P.08]
+            a dictionary that maps the amount of time a
+            letter appears in the answer to the letter
 
     Methods:
         P.Mthd.01 - Build Answer                                [Problem P.02]
@@ -179,7 +183,7 @@ class Game:
 
         SPECIFICATIONS
         settings                                                [Attr M.03]
-        way to randomly create an answer combo                  [Problem P.02]
+        answer combination                                      [Attr P.01]
         way to get a valid guess from the user                  [Problem P.03]
         way to compare the guess with the answer                [Problem P.06]
 
@@ -274,14 +278,83 @@ class Game:
         Representation should be updated every time input
         is received from the user
 
-    Problem P.06:
+    Problem P.07:
         Need to compare the user's guess to the answer
 
         Specifications:
         user's guess
         answer                                                  [Attr P.01]
+        map of unique characters in the answer                  [Attr P.02]
+        way to get the sum of a map of integers                 [sum(dict.
+                                                                itervalues())]
+        way to find the amount of correct letters and           [Problem P.09]
+            similar letters based off the amount of
+            similar letters
+        way to parse data about the guess comparison into a     [Problem P.10]
+            string
 
         Basic Design:
+        For every guess that's in the combination and in
+        the right place show an 'x'. For every guess that's
+        in the combination but not in the right place show
+        an 'o'.
+
+        Find the count of a specific letter in the guess.
+        Check to see if the indices are matching
+
+        Algorithm:
+        Initialize the amount of similar letters to the
+                sum of all the amounts in the answer map
+        Find the correct and similar letters from the answer
+        Return a parsed string of the two values
+
+    Problem P.08:
+        Need to map the amount of times each unique character
+        appears in the answer
+
+        Specifications:
+        mapping data structure                                  [dict]
+        way to find unique characters in a string               [''.join(set(
+                                                                string))]
+        way to find the amount of times a character occurs      [string.count(
+            in a string                                         character)]
+        answer combination                                      [Attr P.01]
+
+        Basic Design:
+        Use a definite loop to map the count of a specific
+        letter in a string to that letter
+
+        Algorithm:
+        Initialize a mapping data structure
+        For each unique letter in the answer combination
+            map the amount of times the letter is in the
+                    combination to the letter
+        return the map
+
+    Problem P.09:
+        Need to find the amount of correct letters and the
+        amount of similar letters based of number of total
+        similar letters
+
+        Specifications:
+        integer amount of similar letters                       [Problem P.07]
+        answer combination string                               [Attr P.01]
+        user's guess string
+
+        Basic Design:
+        Use a definite loop and a comparison of the two
+        strings to find the amount of correct letters and
+        subtract it from the total amount of
+        similar letters
+
+        Algorithm:
+        Initialize the amount of correct letters to 0
+        For each letter in the user's guess
+            If the letter and index of the guess and the
+                    answer are the same
+                subtract one from the similar letters
+                add one to the correct letters
+        Return the two values
 
 
 
@@ -328,7 +401,19 @@ class Game Representation:
 
         Specifications:
         data from the user                                      [Problem P.05]
-        handler for the data
+        way to parse the data from the user                     [Problem R.06]
+        list of strings to use for formatting                   [Attr R.03]
+        current index for the list                              [Problem R.07]
+
+        Basic Design:
+        Parse the data from the user and replace the
+        generic string at the appropriate index
+
+        Algorithm:
+        Initialize a string as the parsed user data
+        Index into the list of strings to use for
+                formatting and set the item to the parsed
+                user data
 
     Problem R.02:
         need to compare two strings based on their lengths
@@ -434,3 +519,7 @@ class Game Representation:
             cut off the end
             append the string to the base-strings list
         return the base-strings list
+
+    Problem R.06
+        Need to parse data from the user so it can be used
+        to update what's shown to the screen
