@@ -62,28 +62,6 @@ class Menu:
             A dictionary where the keys are input-option
             strings and the values are option methods
 
-        M.attr.02 - Option Names (immutable):
-            A list of strings as option names to display
-
-        M.Attr.03 - Settings (mutable):
-            A dictionary where each key is a string as the
-            name of the setting and each item is an
-            instance of the type needed for that setting
-
-        M.Attr.03.a - Guess Types (mutable):
-            A string of letters where each letter is each
-            sequential letter of the alphabet for as long
-            as the specified amount of guess types
-
-        M.Attr.03.b - Combination Length (mutable):
-            An integer that represents the length of any
-            combination within a game instance
-
-        M.Attr.03.c - Guesses (mutable):
-            An integer that represents the amount of
-            guesses the user is allowed before they lose
-            the game
-
     Methods:
         M.Mthd.01 - get option:                                  [problem M.01]
             Displays the menu to the terminal then waits
@@ -167,6 +145,10 @@ class Game:
             a dictionary that maps the amount of time a
             letter appears in the answer to the letter
 
+        P.Attr.03 - Settings (immutable):                       [Settings
+            a settings dictionary that determines the           Dictionary]
+            inner-workings of the game
+
     Methods:
         P.Mthd.01 - Build Answer                                [Problem P.02]
             creates a randomized string of letters based
@@ -186,6 +168,20 @@ class Game:
         answer combination                                      [Attr P.01]
         way to get a valid guess from the user                  [Problem P.03]
         way to compare the guess with the answer                [Problem P.06]
+        way to update the information displayed to the user     [Problem P.11]
+
+        Basic Design:
+        Use a definite loop determined by the guess count
+        to get input from the user and process the input.
+
+        Algorithm:
+        Initialize the game with the given settings
+        For the guess count determined by the settings
+            get a valid guess from the user
+            if the guess is correct break the loop
+            otherwise initialize a string as the comparison
+                    of the guess and the answer
+            update the information displayed to the user
 
     Problem P.02:
         Need to generate a random combination of a
@@ -193,14 +189,14 @@ class Game:
         linear amount of numbers
 
         Specifications:
-        a linear sequence to draw from                          [Attr M.03.a]
-        amount for the length of a random sequence              [Attr M.03.b]
+        a linear sequence to draw from                          [Key S.01]
+        amount for the length of a random sequence              [Key S.02]
         way to randomly choose from a list                      [random]
 
         Basic Design:
-        use a for loop invariant to iterate through the
-        linear sequence and append a random choice from it
-        to a new list as the random sequence
+        use a definite to iterate through the linear
+        sequence and append a random choice from it to a
+        new list as the random sequence
 
         Algorithm:
         initialize the random sequence for the loop
@@ -238,9 +234,11 @@ class Game:
         Need to make sure the user's guess is valid
 
         Specifications:
-        user's guess                                            [raw_input]
-        a linear sequence to draw from                          [Attr M.03.a]
-        amount for the length of a random sequence              [Attr M.03.b]
+        user's guess
+        way to find out if a character isn't punctuation        [Problem P.11]
+        way to filter a string based on a bool                  [filter]
+        a linear sequence to draw from                          [Key S.01]
+        amount for the length of a random sequence              [Key S.02]
 
         Basic Design:
         within a try clause, make sure the user's guess is
@@ -248,14 +246,13 @@ class Game:
         sure each character is in the guessing-letters
 
         Algorithm:
+        set the guess to equal the user's guess without
+                punctuation or spaces
         try to run the following procedure
             for each character in the user's guess
-                assert the character's are in the
-                        guessing-letters list from the
-                        settings dictionary
+                assert the character is a guessing-letter
             assert the length of the user's guess is the
-                    same as the combo-length from the
-                    settings dictionary
+                    guess-length
         if anything goes wrong
             return False
         return True
@@ -355,6 +352,54 @@ class Game:
                 subtract one from the similar letters
                 add one to the correct letters
         Return the two values
+
+    Problem P.10
+        Need to parse data about the guess comparison into
+        a string that gives the user info on the accuracy
+        of their guess
+
+    Problem P.11
+        Need to determine if a character is a letter
+
+        Specifications:
+        A 1-character string to check
+        A string of lowercase letters                           [string.
+                                                                lowercase]
+        way to convert a capital letter to a lower-case         [string.lower]
+        letter
+
+        Basic Design:
+        make sure the character is lowercase then compare
+        it to lowercase letters
+
+        Algorithm:
+        convert the character to lowercase
+        test if it's in the string of lowercase letters
+        return that value
+
+
+
+
+
+class Settings Dictionary:
+    Not an actual class but a dictionary that must have 3
+    keys: "Types", "Length", and "Attempts". Use these to
+    instantiate Game objects
+
+    S.Key.01 - Guess Types (mutable):
+        A string of letters where each letter is each
+        sequential letter of the alphabet for as long
+        as the specified amount of guess types
+
+    S.Key.02 - Combination Length (mutable):
+        An integer that represents the length of any
+        combination within a game instance
+
+    s.Key.03 - Guesses Count (mutable):
+        An integer that represents the amount of
+        guesses the user is allowed before they lose
+        the game
+
 
 
 

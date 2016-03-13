@@ -4,21 +4,40 @@ class GameRepresentation(object):
     def __init__(self, settings):
         """Assumes settings is a settings dictionary.
 
-        Creates a GameRepresentation with the given arguments."""
-        self.settings = settings
+        Create a GameRepresentation with the given arguments."""
+
+        # Polymorphic defensive programming
+        try:
+            for attribute in ("__iter__", "keys"):
+                assert hasattr(settings, attribute), TypeError
+            for method in (settings.__iter__, settings.keys):
+                assert callable(method), AttributeError
+            for setting in ("Length", "Types", "Attempts"):
+                assert setting in settings.keys(), ValueError
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Initialize attributes
+        self.__settings = settings
+
+    @property
+    def settings(self):
+        """The settings dictionary."""
+        return self.__settings.copy()
 
     def __create_base_strings(self, settings):
         """Assumes settings is a settings dictionary"""
         if type(settings) != dict:
             raise TypeError
-        settings_keys = ("Guess-Types", "Combination Length", "Guesses")
+        settings_keys = ("Types", "Combination Length", "Attempts")
         if settings_keys not in settings.keys():
             raise ValueError
 
         base_strings = []
-        base_strings.append(settings["Guess-Types"].replace("", " ")[1:-1])
+        base_strings.append(settings["Types"].replace("", " ")[1:-1])
 
-        for i in xrange(settings["Guesses"]):
+        for i in xrange(settings["Attempts"]):
             base_strings.append(
                 (" {}"*settings["Combination Length"])[1:]])
 
@@ -31,7 +50,7 @@ class GameRepresentation(object):
         Each string in strings is part of the representation of the game. (This method only produces the desired results for the representation of the game).
         longest is the index of the longest string in strings
 
-        Returns a list of strings that are all the same size."""
+        Return a list of strings that are all the same size."""
         if type(strings) not in (list, tuple):
             raise TypeError
         try:
@@ -72,7 +91,7 @@ class GameRepresentation(object):
 
         string_to_modify is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
 
-        Returns a copy of the given string with a buffer on both ends."""
+        Return a copy of the given string with a buffer on both ends."""
         if type(string_to_modify) != str or type(length) != int:
             raise TypeError
         if length < len(string_to_modify):
