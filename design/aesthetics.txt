@@ -1,0 +1,91 @@
+General
+The game is run completely on a terminal and is completely limited to "ascii art." This means that in order to not be overwhelming, the graphics should be fundamentally simple.
+
+Without doing any research here are some ideas on how to achieve simplicity:
+    don't clutter the screen with lots of different characters
+    try to be as spacious as possible
+    if there's text make sure to use a standard signifier
+        - like some sort of a box or something
+
+Menu
+
+
+[ Menu ]
+
+> n - new game
+> c - continue game*
+> q - quit game
+
+> s - settings
+> h - help
+> i - about
+
+> _
+
+* only displays when there's currently a game in progress
+
+
+
+
+Game
+
+
+[ a b c d e f ]
+
+    a a b b   |   xo
+
+    a c a d   |   xxx
+
+>   a e a d   |   xxxx
+
+    _ _ _ _   |
+
+    _ _ _ _   |
+
+_______________
+
+    a e a d
+
+> /m - menu
+> /q - quit
+
+> _
+
+
+
+
+[ Settings ]
+
+> r - restore defaults
+> b - back
+
+> t - amount of letters chosen from
+> d - combination length
+> a - attempts allowed
+
+[ current settings ]
+  t: 6 m: 4 a: 5
+
+> _
+
+
+
+
+[ Help ]
+
+> b - back
+
+Help page (More info to come soon).
+
+> _
+
+
+
+
+[ About ]
+
+> b - back
+
+About page (More info to come soon).
+
+> _

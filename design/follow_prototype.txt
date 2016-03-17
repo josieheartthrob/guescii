@@ -1,0 +1,334 @@
+get_hint("a e f a", "a e e a")
+
+exact = 0
+similar = 0
+indices = []
+
+for i in xrange(len(guess.split())):
+  xrange(len("a e f a".split()))
+  xrange(len(["a", "e", "f", "a"]))
+  xrange(4)
+  [0, 1, 2, 3]
+    |
+    | i = 0:
+    |     |
+    |     | for j in xrange(len(answer.split())):
+    |     |   xrange(len("a e e a".split()))
+    |     |   xrange(len(["a", "e", "e", "a"]))
+    |     |   xrange(4)
+    |     |   [0, 1, 2 3]
+    |     |     |
+    |     |     | j = 0:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*0] == "a e f a"[2*0]
+    |     |     |     |   "a e e a"[0] == "a e f a"[0]
+    |     |     |     |   "a" == "a" = True
+    |     |     |     |
+    |     |     |     |   2*0 not in []
+    |     |     |     |   0 not in [] = True
+    |     |     |     |
+    |     |     |     |   True and True = True:
+    |     |     |     |     |
+    |     |     |     |     | indices.append(2*j)
+    |     |     |     |     |   indices = indices.append(2*0)
+    |     |     |     |     |   indices = [].append(0)
+    |     |     |     |     |   indices = [0]
+    |     |     |     |     |
+    |     |     |     |     | similar += 1
+    |     |     |     |     |   similar = similar + 1
+    |     |     |     |     |   similar = 0 + 1
+    |     |     |     |_____|___similar = 1
+    |     |     |
+    |     |     | j = 1:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*1] == "a e f a"[2*0]
+    |     |     |     |   "a e e a"[2] == "a e f a"[0]
+    |     |     |     |   "e" == "a" = False
+    |     |     |     |
+    |     |     |     |   2*1 not in [0]
+    |     |     |     |   2 not in [0] = True
+    |     |     |     |
+    |     |     |     |___False and True = False
+    |     |     |
+    |     |     | j = 2:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*2] == "a e f a"[2*0]
+    |     |     |     |   "a e e a"[4] == "a e f a"[0]
+    |     |     |     |   "e" == "a" = False
+    |     |     |     |
+    |     |     |     |   2*2 not in [0]
+    |     |     |     |   4 not in [0] = True
+    |     |     |     |
+    |     |     |     |___False and True = False
+    |     |     |
+    |     |     | j = 3:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*3] == "a e f a"[2*0]
+    |     |     |     |   "a e e a"[6] == "a e f a"[0]
+    |     |     |     |   "a" == "a" = True
+    |     |     |     |
+    |     |     |     |   2*3 not in [0]
+    |     |     |     |   6 not in [0] = True
+    |     |     |     |
+    |     |     |     |   True and True = True:
+    |     |     |     |     |
+    |     |     |     |     | indices.append(2*j)
+    |     |     |     |     |   indices = indices.append(2*3)
+    |     |     |     |     |   indices = [0].append(6)
+    |     |     |     |     |   indices = [0, 6]
+    |     |     |     |     |
+    |     |     |     |     | similar += 1
+    |     |     |     |     |   similar = similar + 1
+    |     |     |     |     |   similar = 1 + 1
+    |     |     |_____|_____|___similar = 2
+    |     |
+    |     | if guess[2*i] == answer[2*i]:
+    |     |   "a e f a"[2*0] == "a e e a"[2*0]
+    |     |   "a e f a"[0] == "a e e a"[0]
+    |     |   "a" == "a" = True
+    |     |     |
+    |     |     | exact += 1
+    |     |     |   exact = exact + 1
+    |     |     |   exact = 0 + 1
+    |     |     |   exact = 1
+    |     |     |
+    |     |     | similar -= 1
+    |     |     |   similar = similar - 1
+    |     |     |   similar = 2 - 1
+    |     |_____|___similar = 1
+    |
+    | i = 1:
+    |     |
+    |     | for j in xrange(len(answer.split())):
+    |     |   xrange(len("a e e a".split()))
+    |     |   xrange(len(["a", "e", "e", "a"]))
+    |     |   xrange(4)
+    |     |   [0, 1, 2 3]
+    |     |     |
+    |     |     | j = 0:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*0] == "a e f a"[2*1]
+    |     |     |     |   "a e e a"[0] == "a e f a"[2]
+    |     |     |     |   "a" == "e" = False
+    |     |     |     |
+    |     |     |     |   2*0 not in [0, 6]
+    |     |     |     |   0 not in [0, 6] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 1:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*1] == "a e f a"[2*1]
+    |     |     |     |   "a e e a"[2] == "a e f a"[2]
+    |     |     |     |   "e" == "e" = True
+    |     |     |     |
+    |     |     |     |   2*1 not in [0, 6]
+    |     |     |     |   2 not in [0, 6] = True
+    |     |     |     |
+    |     |     |     |   True and True = True:
+    |     |     |     |     |
+    |     |     |     |     | indices.append(2*j)
+    |     |     |     |     |   indices = indices.append(2*1)
+    |     |     |     |     |   indices = [0, 6].append(2)
+    |     |     |     |     |   indices = [0, 6, 2]
+    |     |     |     |     |
+    |     |     |     |     | similar += 1
+    |     |     |     |     |   similar = similar + 1
+    |     |     |     |     |   similar = 1 + 1
+    |     |     |     |_____|___similar = 2
+    |     |     |
+    |     |     | j = 2:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*2] == "a e f a"[2*1]
+    |     |     |     |   "a e e a"[4] == "a e f a"[2]
+    |     |     |     |   "e" == "e" = True
+    |     |     |     |
+    |     |     |     |   2*2 not in [0, 6, 2]
+    |     |     |     |   4 not in [0, 6, 2] = True
+    |     |     |     |
+    |     |     |     |   True and True = True:
+    |     |     |     |     |
+    |     |     |     |     | indices.append(2*j)
+    |     |     |     |     |   indices = indices.append(2*2)
+    |     |     |     |     |   indices = [0, 6].append(4)
+    |     |     |     |     |   indices = [0, 6, 2, 4]
+    |     |     |     |     |
+    |     |     |     |     | similar += 1
+    |     |     |     |     |   similar = similar + 1
+    |     |     |     |     |   similar = 2 + 1
+    |     |     |     |_____|___similar = 3
+    |     |     |
+    |     |     | j = 3:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*3] == "a e f a"[2*1]
+    |     |     |     |   "a e e a"[6] == "a e f a"[2]
+    |     |     |     |   "a" == "e" = False
+    |     |     |     |
+    |     |     |     |   2*3 not in [0]
+    |     |     |     |   6 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |_____|___False and False = False
+    |     |
+    |     | if guess[2*i] == answer[2*i]:
+    |     |   "a e f a"[2*1] == "a e e a"[2*1]
+    |     |   "a e f a"[2] == "a e e a"[2]
+    |     |   "e" == "e" = True
+    |     |     |
+    |     |     | exact += 1
+    |     |     |   exact = exact + 1
+    |     |     |   exact = 1 + 1
+    |     |     |   exact = 2
+    |     |     |
+    |     |     | similar -= 1
+    |     |     |   similar = similar - 1
+    |     |     |   similar = 3 - 1
+    |     |_____|___similar = 2
+    |
+    | i = 2:
+    |     |
+    |     | for j in xrange(len(answer.split())):
+    |     |   xrange(len("a e e a".split()))
+    |     |   xrange(len(["a", "e", "e", "a"]))
+    |     |   xrange(4)
+    |     |   [0, 1, 2 3]
+    |     |     |
+    |     |     | j = 0:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*0] == "a e f a"[2*2]
+    |     |     |     |   "a e e a"[0] == "a e f a"[4]
+    |     |     |     |   "a" == "f" = False
+    |     |     |     |
+    |     |     |     |   2*0 not in [0, 6, 2, 4]
+    |     |     |     |   0 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 1:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*1] == "a e f a"[2*2]
+    |     |     |     |   "a e e a"[2] == "a e f a"[4]
+    |     |     |     |   "e" == "f" = False
+    |     |     |     |
+    |     |     |     |   2*1 not in [0, 6, 2, 4]
+    |     |     |     |   2 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 2:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*2] == "a e f a"[2*2]
+    |     |     |     |   "a e e a"[4] == "a e f a"[4]
+    |     |     |     |   "e" == "f" = False
+    |     |     |     |
+    |     |     |     |   2*2 not in [0, 6, 2, 4]
+    |     |     |     |   4 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 3:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*3] == "a e f a"[2*2]
+    |     |     |     |   "a e e a"[6] == "a e f a"[4]
+    |     |     |     |   "a" == "f" = False
+    |     |     |     |
+    |     |     |     |   2*3 not in [0]
+    |     |     |     |   6 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |_____|___False and False = False
+    |     |
+    |     | if guess[2*i] == answer[2*i]:
+    |     |   "a e f a"[2*2] == "a e e a"[2*2]
+    |     |   "a e f a"[4] == "a e e a"[4]
+    |     |___"f" == "e" = False
+    |
+    | i = 3:
+    |     |
+    |     | for j in xrange(len(answer.split())):
+    |     |   xrange(len("a e e a".split()))
+    |     |   xrange(len(["a", "e", "e", "a"]))
+    |     |   xrange(4)
+    |     |   [0, 1, 2 3]
+    |     |     |
+    |     |     | j = 0:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*0] == "a e f a"[2*3]
+    |     |     |     |   "a e e a"[0] == "a e f a"[6]
+    |     |     |     |   "a" == "a" = True
+    |     |     |     |
+    |     |     |     |   2*0 not in [0, 6, 2, 4]
+    |     |     |     |   0 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___True and False = False
+    |     |     |
+    |     |     | j = 1:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*1] == "a e f a"[2*3]
+    |     |     |     |   "a e e a"[2] == "a e f a"[6]
+    |     |     |     |   "e" == "a" = False
+    |     |     |     |
+    |     |     |     |   2*1 not in [0, 6, 2, 4]
+    |     |     |     |   2 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 2:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*2] == "a e f a"[2*3]
+    |     |     |     |   "a e e a"[4] == "a e f a"[6]
+    |     |     |     |   "e" == "a" = False
+    |     |     |     |
+    |     |     |     |   2*2 not in [0, 6, 2, 4]
+    |     |     |     |   4 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |     |___False and False = False
+    |     |     |
+    |     |     | j = 3:
+    |     |     |     |
+    |     |     |     | if answer[2*j] == guess[2*i] and 2*j not in indices
+    |     |     |     |   "a e e a"[2*3] == "a e f a"[2*3]
+    |     |     |     |   "a e e a"[6] == "a e f a"[6]
+    |     |     |     |   "a" == "a" = True
+    |     |     |     |
+    |     |     |     |   2*3 not in [0]
+    |     |     |     |   6 not in [0, 6, 2, 4] = False
+    |     |     |     |
+    |     |     |_____|___True and False = False
+    |     |
+    |     | if guess[2*i] == answer[2*i]:
+    |     |   "a e f a"[2*3] == "a e e a"[2*3]
+    |     |   "a e f a"[6] == "a e e a"[6]
+    |     |   "a" == "a" = True
+    |     |     |
+    |     |     | exact += 1
+    |     |     |   exact = exact + 1
+    |     |     |   exact = 2 + 1
+    |     |     |   exact = 3
+    |     |     |
+    |     |     | similar -= 1
+    |     |     |   similar = similar - 1
+    |     |     |   similar = 2 - 1
+    |_____|_____|___similar = 1
+
+return (" x"*exact + " o"*similar)[1:]
+  (" x"*3 + " o"*1)[1:]
+  (" x x x" + " o")[1:]
+  " x x x o"[1:]
+__"x x x o"
+
+get_hint("a e f a", "a e e a") == "x x x"
+"x x x o" == "x x x" = False

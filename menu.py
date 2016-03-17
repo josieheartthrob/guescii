@@ -1,35 +1,26 @@
 import subprocess
+from option import Option
 
 class Menu(object):
     """Determine when the user wants to quit"""
 
     # Static variables
-    default_settings = {
-        "Types": 6,
-        "Length:" 4,
-        "Attempts": 10}
 
     _options = {
         "n": Option("n", "new game"),
         "s": Option("s", "settings"),
         "q": Option("q", "quit")}
 
-    invalid_option = "You entered an invalid option.\n" \
-                      "Please choose between [{0}]\n"
-
     # Class methods
     def __init__(self, parent):
         """Assumes parent is a guess object"""
         self.parent = parent
-        self.__options = Menu._options.copy()
-        self.__options["n"].function
-
-    # Public Properties
-
-    @property
-    def options():
-        """A dictionary of callable option-functions where each key is a string"""
-        return self.__options.copy()
+        self._options = Menu._options.copy()
+        self._options["n"].function = parent.play_game
+        self._options["s"].function = self.change_settings
+        self._options["q"].function = quit
+        self._order = ["n", "s", "q"]
+        self._option_was_invalid = False
 
     # Public Methods
 
@@ -51,7 +42,7 @@ class Menu(object):
             raise exception.args[0]
 
         # Main algorithm
-        self.__options[option.key] = option
+        self._options[option.key] = option
 
     def delete_option(self, option):
         """Assumes option is a string;
@@ -79,84 +70,73 @@ class Menu(object):
         Return the user's chosen option."""
 
         # Display the menu
+        subprocess.call("cls", shell=True)
         print self
         option = raw_input("> ")
+        if option not in self.option.keys();
+            self.option_was_invalid = True
+            raise ValueError
+        else:
+            self.option_was_invalid = False
+        return self.options[option]
 
-        while option not in self.options.keys():
-            # Clear the screen
-            subprocess.call("cls", shell=True)
+    def change_settings(self):
+        raise NotImplementedError
 
-            # Display the Invalid Option Menu
-            print self
-            print Menu._invalid_option.format(self.options.keys())
-            option = raw_input("> ")
+    # Public Properties
 
-        return option
+    @property
+    def options():
+        """A dictionary of callable option-functions where each key is a string."""
+        return self._options.copy()
 
+    @property
+    def option_was_invalid(self):
+        """Return True if the previous optioin entered was invalid."""
+        return self._option_was_invalid
+
+    @option_was_invalid.setter
+    def option_was_invalid(self, value):
+        """Assumes value is a boolean value.
+        Set option_was_invalid to the given value."""
+
+        # Defensive programming
+        try:
+            type(value) == bool, TypeError
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Main algorithm
+        self._option_was_invalid = value
+
+    @property
+    def order(self):
+        """The order of options to display to the menu."""
+        return self._order
+
+    @order.setter
+    def order(self, order):
+        """Assumes order is a list of option keys where each relative option is in the menu options.
+
+        Modify the order of options to display to the menu."""
+
+        # Polymorphic defensive programming
+        try:
+            assert False, NotImplementedError
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Main algorithm
+        self._order = order
 
     # Private Mehtods
 
     def __str__(self):
         s = "[Menu]\n\n"
-        for option in self.options:
-            s += option.__str__() + "\n"
+        for key in order:
+            s += self.options[key].__str__() + "\n"
+        if self.option_was_invalid:
+            s += "\n" + Option.invalid_option.format(self.options.keys())
         return s
-
-
-
-class Option(object):
-    """An option to display on the menu."""
-
-    def __init__(self, key, name):
-        """Assumes key and name are strings;
-        function is a callable object.
-
-        Create an Option object"""
-
-        # Polymorphic defensive programming
-        try:
-            assert type(key), type(name) == str, TypeError
-
-        except AssertionError, exception:
-            raise exception.args[0]
-
-        # Initialize attributes
-        self.__function = None
-        self.key = key
-        self.name = name
-
-    @property
-    def function(self):
-        """The function to call for the option."""
-
-        # Polymorphic defensive programming
-        try:
-            assert type(self.__function) != None, AttributeError
-
-        except AssertionError, exception:
-            raise exception.args[0]
-
-        # Main algorithm
-        return self.__function
-
-    @function.setter
-    def function(self, f):
-        """Assumes f is a callable object.
-
-        Set the function property to f."""
-
-        # Polymorphic defensive programming
-        try:
-            assert callable(f), TypeError
-
-        except AssertionError, exception:
-            raise exception.args[0]
-
-        # Main algorithm
-        self.__function = f
-
-    def __str__(self):
-        return "> {0.key} - {0.name}".format(self)
-
-    def __call__(self):
-        self.__function()

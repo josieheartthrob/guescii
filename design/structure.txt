@@ -1,0 +1,172 @@
+Class Guesscii:
+    The main class that handles  the program and stores all
+    of the general data.
+
+    Attributes:
+        G.Attr.01 - Menu (immutable):                           [Menu]
+            A menu class instance that  controls user input
+            for everything outside the actual game.
+
+        G.Attr.02 - Game (mutable):                             [Game]
+            A game class instance that  controls user input
+            for everything within the actual game.
+
+        G.Attr.03 - Default Settings (immutable):               [Settings Dict-
+            A settings dictionary that contains the default         ionary]
+            settings and remains constant so it can be used
+            to restore the default settings.
+
+        G.Attr.04 - Current Settings (mutable)                  [Settings Dict-
+            A settings dictionary that contains the current         ionary]
+            settings to be used to play the game.
+
+    Methods:
+        G.Mthd.01 - Main:                                       [problem G.01]
+            Loop the program until the user wants to quit.
+
+        G.Mthd.02 - Play the Game:                              [Problem G.xx]
+            Play the game with the current settings.
+
+
+
+class Menu:
+    An interface class that displays information to the us-
+    er and accesses data from its parent Guesscii instance.
+
+    Attributes:
+        M.attr.01 - Options (immutable):                        [Option]
+            A dictionary of  option objects where  each key
+            is an  option key and each value is  the option
+            associated with that key.
+
+    Methods:
+        M.Mthd.01 - Get Option:                                 [problem M.01]
+            Display the menu to  the terminal then wait for
+            the  user to  input a valid  key-string. Return
+            the key.
+
+        M.Mthd.02 - string:
+            Return a string that represents the menu.
+
+
+
+class Game:
+    Attributes:
+        P.Attr.01 - Settings (immutable):                       [Init P.01]
+            settings dictionary that  determines the inner-
+            workings of the game.
+
+        P.Attr.02 - Answer (immutable):                         [Problem P.02]
+            string of random  letters as long  as the value
+            of the settings' combination  length where each
+            letter is within the settings' guess-types.
+
+        P.Attr.03 - Answer Map (immutable):                     [Problem P.08]
+            dictionary that maps the amount of time a lett-
+            er appears in the answer to the letter.
+
+        P.Attr.04 - Guesses (mutable):                          [Problem P.04]
+            list of strings where each item is either a gu-
+            ess from the  user or a generic  string used as
+            a placeholder. The user's  current guess is the
+            last guess before the placeholders.
+
+        P.Attr.05 - Guess Map (mutable):                        [Problem P.08]
+            dictionary that maps the amount of time a lett-
+            er appears in the current guess to the letter.
+
+        P.Attr.05 - Info (mutable):                             [Problem P.07]
+            list of strings where each item is either comp-
+            arison code or a blank string. The current com-
+            parison code is the last guess before the blank
+            strings.
+
+        P.Attr.06 - Representation (mutable):                   [Game Represen-
+            A GameRepresentation.                                   tation]
+
+    Methods:
+        P.Mthd.01 - Main                                        [Problem P.01]
+            Run the actual game.
+
+        P.Mthd.02 - Build Answer                                [Problem P.02]
+            Create a randomized string of letters based off
+            the settings.
+
+        P.Mthd.03 - Ask for Guess                               [Problem P.03]
+            Ask the user for their guess and wait for their
+            input. If the input is  invalid ask again until
+            it's valid.
+
+
+
+class Settings Dictionary:
+    Not an actual class  but a dictionary  that must have 3
+    keys: "Types",  "Length", and "Attempts".  Use these to
+    instantiate Game objects.
+
+    S.Key.01 - Guess Types (mutable):                           [Init S["Guess-
+        A string of letters where each letter is each sequ-         Types"]]
+        ential letter of the alphabet for as long as the s-
+        pecified amount of guess types.
+
+    S.Key.02 - Combination Length (mutable):                    [Init S["Length
+        An integer that represents the length of any combi-         "]]
+        nation within a game instance.
+
+    s.Key.03 - Attempts (mutable):                              [Init S["Attem-
+        An integer that represents the amount of guesses t-         pts"]]
+        he user is allowed before they lose the game.
+
+
+
+class Game Representation:
+    Stores all the information about what should be displa-
+    yed to the screen. Class should be  mutable (attributes
+    should change) as the guesses displayed change.
+
+    Attributes:
+        R.Attr.01 - Header (immutable):                         [Mthd R.01]
+            A string of the guess types to pick from that
+            displays at the top of the screen
+
+        R.Attr.02 - Guess-Lines (immutable):                    [Mthd R.01]
+            A list of formattable strings as each following
+            line under the header.
+
+        R.Attr.04 - Options (static; immutable):                []
+            a string that represents the options the user
+            can enter.
+
+    Methods:
+        R.Mthd.01 - Normalize Strings:                          [Problem R.02]
+            Use a list of uneven base-strings and even them
+            out to be stored in the header and base-strings
+            attributes.
+
+
+
+class Option:
+    An option that can be  displayed on the  screen as well
+    as called for functionality
+
+    Attributes:
+        O.Attr.01 - key (immutable, public):                    [Init O.01]
+            A simple string of 1-2 characters that the user
+            can enter to access the option.
+
+        O.Attr.02 - name (immutable, public):                   [Init O.02]
+            A string as the name of the option to be displ-
+            ayed to the screen.
+
+        O.Attr.03 - function (immutable, private):              [Problem]
+            The function that's  called when the  option is
+            accessed.
+
+    Methods:
+        O.Mthd.01 - print:                                      [Problem]
+            Return a string that  represents the  option w-
+            hen paired with  the print keyword or when  the
+            __str__ method is called.
+
+        O.Mthd.02 - call:                                       [Problem]
+            Call the object's function attribute.

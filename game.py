@@ -1,10 +1,10 @@
-import string
+import string, subprocess
 from representation import GameRepresentation
 
 class Game(object):
     """The main class that runs the actual game."""
 
-    correct = "x"
+    exact = "x"
     similar = "o"
 
     def __init__(self, settings):
@@ -12,29 +12,36 @@ class Game(object):
 
         # Polymorphic defensive programming
         try:
-            assert type(settings) == dict, TypeError
-
-            # Make sure the dictionary has the right keys
-            for setting in ("Types", "Length", "Attempts"):
+            for attribute in ("__iter__", "keys"):
+                assert hasattr(settings, attribute), TypeError
+            for method in (settings.__iter__, settings.keys):
+                assert callable(method), AttributeError
+            for setting in ("Length", "Types", "Attempts"):
                 assert setting in settings.keys(), ValueError
 
         except AssertionError as exeption:
             raise exception.args[0]
 
         # Initialize values
-        self.__settings = settings
-        self.representation = GameRepresentation(settings)
+        self._settings = settings
         self.answer = self.build_answer()
         self.answer_map = {L: self.answer.count(L) for L in set(self.answer)}
-        self.__guess = None
-        self.__info = None
+        self._guess = None
+        self._guess_map = None
+        self._hint = None
+        self._options = None
+        self.representation = GameRepresentation(settings, self)
 
     def main(self):
-        for i in xrange(self.__settings["Attempts"]):
+        for i in xrange(self._settings["Attempts"]):
+            subprocess.call("cls", shell=True)
             self.guess = self.ask_for_guess()
-            if self.guess == self.answer:
+            self.hint = self.compare_guess()
+            if self.guess == self.answer or self.guess in self.options:
                 break
-            self.info = self.compare_guess()
+        if self.guess in self.options:
+            return self.options[self.guess]
+        self.reveal_answer()
 
     def ask_for_guess(self):
         raise NotImplementedError
@@ -42,19 +49,46 @@ class Game(object):
     def compare_guess(self):
         """Return a string that gives the user info about their guess."""
 
-        total_similar = sum(self.answer_map.itervalues())
-        correct, similar = self.differentiate_letters(self.guess, total_similar)
-        return self.parse_into_answer_info(correct, similar)
+        exact = sum([1 for i in xrange(len(self.guess)) if
+                     guess[i] == answer[i]])
+        similar = (sum([min(self.answer_map[letter],
+                            self.guess_map[letter])
+                        for letter in self.answer_map if
+                        letter in self.guess_map]) - exact)
+        return "x"*similar + "o"*exact
+
+    def build_answer(self):
+        """Create a randomized string of letters based off the settings."""
+
+        answer = ""
+        for i in xrange(self._settings["Length"]):
+            answer += self._settings["Types"].choice()
+        return answer
 
     @property
     def settings(self):
         """The settings dictionary."""
-        return self.__settings.copy()
+        return self._settings.copy()
+
+    @property
+    def options(self):
+        """The options dictionary."""
+
+        # Defensive programming
+        try:
+            assert False, NotImplementedError
+            assert type(self._options) != None, TypeError
+
+        except AssertionError, exception:
+            raise excpetion.args[0]
+
+        # Main algorithm
+        return self._options.copy()
 
     @property
     def guess(self):
         """Return the user's current guess."""
-        return self.__guess
+        return self._guess
 
     @guess.setter
     def guess(self, guess):
@@ -72,76 +106,76 @@ class Game(object):
 
             # Ensure the guess meets requirements
             for letter in guess:
-                assert letter in self.__settings["Types"], ValueError
-            assert len(guess) == self.__settings["Length"], ValueError
+                assert letter in self._settings["Types"], ValueError
+            assert len(guess) == self._settings["Length"], ValueError
 
         except AssertionError as excpetion:
             raise exception.args[0]
 
         # Main algorithm
-        self.__guess = guess
+        self._guess = guess
+        self.guess_map = {L: guess.count(L) for L in set(guess)}
 
     @property
-    def info(self):
+    def hint(self):
         """The info of the comparison between the guess and the anser."""
-        return self.__info
+        return self._hint
 
-    @info.setter
-    def info(self, information):
-        """Assumes information is a string;
+    @hint.setter
+    def hint(self, hint):
+        """Assumes hint is a string;
 
-        information consists only of the characters determined by the correct and similar static attributes of the Game class.
+        hint consists only of the characters determined by the exact and similar static attributes of the Game class.
 
-        Modify the info property to the given argument"""
+        Modify the hint property to the given argument"""
 
         # Defensive programming
         try:
-            assert type(information) == str, TypeError
-            letters = "{0.correct}{0.similar}".format(Game)
-            for letter in information:
+            assert type(hint) == str, TypeError
+            letters = "{0.exact}{0.similar}".format(Game)
+            for letter in hint:
                 assert letter in letters, ValueError
-            assert len(information) <= self.settings["Length"], ValueError
-
-        except AssertionError, exception:
-            raise exception.args[0]
-
-        # Main algorithm
-        self.__info = information
-
-    def build_answer(self):
-        """Create a randomized string of letters based off the settings."""
-
-        answer = ""
-        for i in xrange(self.__settings["Length"]):
-            answer += self.__settings["Types"].choice()
-        return answer
-
-    def differentiate_letters(self, similar):
-        """Assumes similar is a positive integer;
-        Guess is a string as long as the combination length
-
-        similar is the total amount of similar letters in the guess
-
-        Return the amount of correct letters and the ammount of similar letters in the guess."""
-
-        # Defensive programming
-        try:
-            assert type(similar) == int, TypeError
-            assert similar >= 0, ValueError
+            assert len(hint) <= self.settings["Length"], ValueError
 
         except AssertionError as exception:
             raise exception.args[0]
 
         # Main algorithm
-        correct = 0
-        for i in xrange(len(self.guess)):
-            if self.guess[i] == self.answer[i]:
-                similar -= 1
-                correct += 1
-        return correct, similar
+        self._hint = hint
 
-    def parse_into_answer_info(self):
-        raise NotImplementedError
+    @property
+    def guess_map(self):
+        """A map of the amount of times a character occurs in the guess to the relative character."""
+
+        # Defensive programming
+        try:
+            assert type(self._guess_map) != None
+
+        except AssertionError, excpetion:
+            raise excpetion.args[0]
+
+        # Main algorithm
+        return self._guess_map.copy()
+
+    @guess_map.setter
+    def guess_map(self, map_):
+        """Assumes map is a mapping type where each key is a unique character in the guess and each value is the amount of times that key occurs in the guess."""
+
+        # Polymorphic defensive programming
+        try:
+            for attribute in ("__iter__", "itervalues")
+                assert hasattr(map_, attribute), TypeError
+            for method in (map_.__iter__, map_.itervalues):
+                assert callable(method), AttributeError
+            assert map_.keys() in set(self.guess), ValueError
+            for key in map_:
+                assert map_[key] == self.guess.find(key), ValueError
+
+        except AssertionError as exception:
+            raise excpetion.args[0]
+
+        # Main algorithm
+        self._guess_map = map_
 
     def __str__(self):
-        raise NotImplementedError
+        return self.representation.__str__()

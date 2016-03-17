@@ -1,4 +1,4 @@
-import random, test_guess, subprocess
+import random, test_guess
 from menu import Menu
 from game import Game
 
@@ -7,12 +7,49 @@ class Guesscii(object):
 
     def __init__(self):
         self.menu = Menu()
-        self.__game = None
+        self._default_settings = {
+            "Types": 6,
+            "Length:" 4,
+            "Attempts": 10}
+        self._current_settings = self.default_settings
+        self._game = None
+
+    def main(self):
+        while True:
+            try:
+                option = self.menu.get_choice()
+            except ValueError:
+                continue
+            option()
+
+    def play_game(self):
+        """Play the game with the given settings."""
+
+        # Polymorphic defensive programming
+        try:
+            assert type(settings) == dict
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Main algorithm
+        self.game = Game(self.settings)
+        self.game.main()
+        del self.game
 
     @property
     def game(self):
-        """A game instance"""
-        return self.__game
+        """A game instance."""
+
+        # Defensive programming
+        try:
+            assert type(self._game) != None, AttributeError
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Main algorithm
+        return self._game
 
     @game.setter
     def game(self, game):
@@ -31,34 +68,36 @@ class Guesscii(object):
             raise exception.args[0]
 
         # Main algorithm
-        self.__game = game
+        self._game = game
 
     @game.deleter
     def game(self):
-        self.__game = None
+        self._game = None
 
-    def main(self):
-        option = self.menu.get_choice()
-        while option != self.menu.options["q"]:
-            self.menu.options[option]()
-            option = self.menu.get_choice()
-        self.menu.options[option]()
+    @property
+    def default_settings(self):
+        """The default settings."""
+        return self._default_settings.copy()
 
-    def play_game(self, settings):
-        """Play the game with the given settings."""
+    @property
+    def current_settings(self):
+        """The game's current settings."""
+        return self._current_settings.copy()
+
+    @current_settings.setter
+    def current_settings(self, settings):
+        """Assumes settings is a settings dictionary.
+        Modify the current settings."""
 
         # Polymorphic defensive programming
         try:
-            assert type(settings) == dict
+            assert False, NotImplementedError
 
         except AssertionError, exception:
             raise exception.args[0]
 
         # Main algorithm
-        self.game = Game(settings)
-        subprocess.call("clear", shell=True)
-        self.game.main()
-        del self.game
+        self._current_settings = settings
 
 if __name__ == '__main__':
     guesscii = Guescii()
@@ -92,12 +131,4 @@ if __name__ == '__main__':
 #             "amount of guesses: ", sign="positive")
 #     else:
 #         settings = get_defaults()
-#     return settings
-#
-# def get_defaults():
-#     """Returns the default settings dictionary"""
-#     settings = {
-#         "guess types": DEFAULTS["GUESS TYPES"],
-#         "combination length": DEFAULTS["COMBINATION LENGTH"],
-#         "guesses": DEFAULTS["GUESSES"]}
 #     return settings

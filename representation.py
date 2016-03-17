@@ -1,10 +1,42 @@
 class GameRepresentation(object):
     """A class that contains all the information to repreent the game. Printing an instance of the class will print the game."""
 
-    def __init__(self, settings):
+    def __init__(self, settings, game):
         """Assumes settings is a settings dictionary.
 
         Create a GameRepresentation with the given arguments."""
+
+        # Polymorphic defensive programming
+        try:
+
+            # Check settings
+            for attribute in ("__iter__", "keys"):
+                assert hasattr(settings, attribute), TypeError("settings")
+            for method in (settings.__iter__, settings.keys):
+                assert callable(method), AttributeError
+            for setting in ("Length", "Types", "Attempts"):
+                assert setting in settings.keys(), ValueError
+
+            # Check game
+            for attribute in ("guess", "info"):
+                assert hasattr(game, attribute), TypeError("game")
+
+        except AssertionError, exception:
+            raise exception.args[0]
+
+        # Initialize attributes
+        self._settings = settings
+        self.base_strings = self._create_base_strings(settings)
+        self.header = self.base_strings[0]
+        self.guess_strings = self.guess_strings[0]
+
+    @property
+    def settings(self):
+        """The settings dictionary."""
+        return self._settings.copy()
+
+    def _create_base_strings(self, settings):
+        """Assumes settings is a settings dictionary"""
 
         # Polymorphic defensive programming
         try:
@@ -15,35 +47,19 @@ class GameRepresentation(object):
             for setting in ("Length", "Types", "Attempts"):
                 assert setting in settings.keys(), ValueError
 
-        except AssertionError, exception:
+        except AssertionError as exeption:
             raise exception.args[0]
 
-        # Initialize attributes
-        self.__settings = settings
-
-    @property
-    def settings(self):
-        """The settings dictionary."""
-        return self.__settings.copy()
-
-    def __create_base_strings(self, settings):
-        """Assumes settings is a settings dictionary"""
-        if type(settings) != dict:
-            raise TypeError
-        settings_keys = ("Types", "Combination Length", "Attempts")
-        if settings_keys not in settings.keys():
-            raise ValueError
-
         base_strings = []
-        base_strings.append(settings["Types"].replace("", " ")[1:-1])
+        base_strings.append("[ "+settings["Types"].replace("", " ")[1:-1]+" ]")
 
-        for i in xrange(settings["Attempts"]):
+        for i in xrange(self.settings["Attempts"]):
             base_strings.append(
-                (" {}"*settings["Combination Length"])[1:]])
+                ("{}|")
 
         return base_strings
 
-    def __normalize_strings(self, strings, longest):
+    def _normalize_strings(self, strings, longest):
         """Assumes strings is a list of string objects;
         longest is an integer.
 
@@ -63,11 +79,11 @@ class GameRepresentation(object):
         normalized_strings = []
         for string in strings:
             if len(string) < len(strings[longest]):
-                normalized_strings.append(self.__buffer_string(
+                normalized_strings.append(self._buffer_string(
                     string, len(strings[longest])))
         return normalized_strings
 
-    def __find_longest_string(self, strings):
+    def _find_longest_string(self, strings):
         """Assumes strings is a list of string objects;
 
         Return the longest of the strings in the list."""
@@ -85,7 +101,7 @@ class GameRepresentation(object):
                 longest_string = string
         return longest_string
 
-    def __buffer_string(self, string_to_modify, length):
+    def _buffer_string(self, string_to_modify, length):
         """Assumes string_to_modify is a string;
         length is a positive integer;
 

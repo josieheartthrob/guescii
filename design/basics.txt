@@ -1,0 +1,17 @@
+The user must try to guess a sequence of letters.
+The sequence stays the same for a single game but is randomized for each game.
+A hint is given to the user with each guess.
+    The amount of letters in the guess that are in the same exact place as the
+            answer and the amount of letters that are in the guess but not in the same place as the answer (excluding the exact guesses) are displayed to the user.
+The user has a distinct amount of attempts to guess the answer before they lose
+        the game.
+
+The user has the option to change the amount of attempts they're given; the
+        amount of letters a guess is composed of; and the pool of letters the
+        guess chooses from when being built.
+When the user first runs the game they're given a variety of options: to start a
+        new game; change the settings; or quit the game
+When the user is playing the game - in addition to guessing the combination:
+        they have the option to quit the game or return to the menu.
+If the user is at the menu and there's a game still in progress, they have the
+        option to continue that game

@@ -1,0 +1,506 @@
+Class Guesscii:
+    Run the program until the user decides to quit.             [Problem G.01]
+
+    Problem G.01:
+        Run the program until the user decides to quit.
+
+        Specifications:
+
+        Implicit:
+        Determine when the user wants to quit.                  [Attr G.01
+                                                                    Mthd 01]
+        Specific error notifying when an option is invalid      [ValueError]
+
+        Basic Design:
+        use an  "infinite" polling loop to  run the program
+        until  the user decides to quit. (if  the option is
+        to quit, the loop will terminate)
+
+        Algorithm:
+        while true
+            try to ask the user to choose a menu option
+            continue the loop if a specific error is caught
+            otherwise call the option
+
+    Problem G.02:
+        Start a new game
+
+        Specifications:
+
+        Implicit:
+        game class                                              [P]
+        current settings                                        [Attr G.04]
+
+        Basic Design:
+        create a new  game instance and call  its main loop
+        to play the game
+
+        Algorithm:
+        create a game instance with the current settings
+        set the game attribute to the game instance
+        call the game's main loop
+        set the game attribute to None
+
+
+
+
+
+class Menu:
+    Get an option from the user                                 [Problem M.01]
+    Display the menu to the user                                [Problem M.02]
+    Determine if there's an incomplete game.
+
+    Problem M.01:
+        Get input from  the user on if they  want to play a
+        game, continue an  ongoing game, change  the setti-
+        ngs, or quit the program.
+
+        i.e. Get a valid option from the user
+
+        Specifications:
+
+        Implicit:
+        Dictionary of option objects                            [Attr M.01]
+        Error to raise if an option is invalid                  [ValueError]
+
+        Helper:
+        Display the menu to the user                            [Mthd M.03]
+        Get input from the user                                 [raw_input]
+        Clear the screen                                        [subprocess.ca-
+                                                                    ll("cls", shell=True)]
+
+        Basic Design:
+        Display  the menu. Get input from  the user and use
+        control statements to determine if the input is va-
+        lid. Raise a ValueError if it's not. A valid option
+        is a key from the menu options attribute.
+
+        Algorithm:
+        clear the screen
+        display the menu to the user
+        ask the user to choose an option
+        if the option isn't in the menu options' keys
+            the option was invalid
+            raise an invalid option error
+        otherwise the option was valid
+        return the relative option object
+
+    Problem M.02:
+        Return a string that represents the menu.
+
+        Specifications:
+        title
+        ordered list of option keys
+        options dictionary
+        was the previous option valid
+        invalid option string
+
+        Basic Design:
+        print the title followed by each sequential option
+
+        Algorithm:
+        initialize the string as the title and 2 new lines
+        for each key in an ordered list of option keys
+            index into the option dictionary with the key
+            add the option string to the menu string
+            add a new line to the menu string
+        if the previous option was invalid
+            add the invalid option string and a new line
+
+
+
+
+
+class Game:
+    Need to play the game                                       [Problem P.01]
+
+    Problem P.01
+        Need to start a new game based off the settings and
+        play it until the user wins or loses
+
+        Specifications:
+
+        Implicit:
+        amount of attempts                                      [Attr P.01[3]]
+        answer combination                                      [Attr P.02]
+        map of game options                                     [NI]
+
+        Helper Specifications:
+        get a valid guess from the user                         [Problem P.03]
+        compare the guess with the answer                       [Problem P.06]
+        update the information to display to the user           [Problem P.11]
+        check if a key is in a map                              [key in dict]
+
+        Basic Design:
+        Use a definite loop determined by the guess count
+        to get input from the user and process the input.
+
+        Algorithm:
+        for the amount of attempts
+            clear the screen
+            get a valid guess from the user
+            if the guess is a game option key
+                break the loop
+            otherwise compare the guess and the answer
+            update the information to display to the user
+            if the guess is correct:
+                reveal the answer
+                break the loop
+        if the guess is a game option key
+            call the option
+        otherwise wait for the user to continue
+
+    Problem P.02:
+        generate a random combination of a specified amount
+        of letters from a specified linear sequence of let-
+        ers
+
+        Specifications:
+        a linear sequence to draw from                          [Key S.01]
+        amount for the length of a random sequence              [Key S.02]
+        way to randomly choose from a list                      [random]
+
+        Basic Design:
+        use a definite to iterate through the linear
+        sequence and append a random choice from it to a
+        new list as the random sequence
+
+        Algorithm:
+        initialize the random sequence for the loop
+        for the length specified for the random sequence
+            append a random choice from the linear sequence
+                    to the random sequence
+
+    Problem P.03:
+        Need to get a guess from the user and check to make
+        sure it's compatible
+
+        Specifications:
+        way to represent the game                               [Problem P.05]
+        an input function to get a guess from the user          [raw_input]
+        a function to check the input to make sure it's         [Problem P.04]
+            compatible
+        way to clear the screen                                 [subprocess]
+
+        Basic Design:
+        use a polling loop to ask for the user's guess until
+        it's valid
+
+        Algorithm:
+        display the game
+        initialize the guess by asking the user for it
+        while the guess is invalid:
+            clear the screen
+            print the game
+            let the user know their guess was invalid and
+                    how to fix it
+            ask for the user's guess
+        return the user's guess
+
+    Problem P.04:
+        Need to make sure the user's guess is valid
+
+        Specifications:
+        user's guess
+        way to find out if a character isn't punctuation        [Problem P.11]
+        way to filter a string based on a bool                  [filter]
+        a linear sequence to draw from                          [Key S.01]
+        amount for the length of a random sequence              [Key S.02]
+
+        Basic Design:
+        within a try clause, make sure the user's guess is
+        exactly the combo-length and use a for loop to make
+        sure each character is in the guessing-letters
+
+        Algorithm:
+        set the guess to equal the user's guess without
+                punctuation or spaces
+        try to run the following procedure
+            for each character in the user's guess
+                assert the character is a guessing-letter
+            assert the length of the user's guess is the
+                    guess-length
+        if anything goes wrong
+            return False
+        return True
+
+    Problem P.05:
+        Need to represent the game
+
+        Specifications:
+        settings                                                [Attr M.03]
+        handlers for what to do with the data
+        mapping type to map user-data to handling methods
+
+        Basic Design:
+        Every line should be about the same length so if
+        one of the lines is short, extra spaces should be
+        formatted in. There are three dependencies so maybe
+        the problem should be broken down into 3 separate
+        problems
+
+        Representation should be updated every time input
+        is received from the user
+
+    Problem P.07:
+        Need to compare the user's guess to the answer
+
+        Specifications:
+        user's guess                                            [Attr P.04]
+        answer                                                  [Attr P.01]
+        map of unique characters in the answer                  [Attr P.02]
+        way to get the sum of a map of integers                 [sum(dict.
+                                                                itervalues())]
+        way to find the amount of correct letters and           [Problem P.09]
+            similar letters based off the amount of
+            similar letters
+        way to parse data about the guess comparison into a     [Problem P.10]
+            string
+
+        Basic Design:
+        For every guess that's in the combination and in
+        the right place show an 'x'. For every guess that's
+        in the combination but not in the right place show
+        an 'o'.
+
+        Find the count of a specific letter in the guess.
+        Check to see if the indices are matching
+
+        Algorithm:
+        Initialize the amount of similar letters to the
+                sum of all the amounts in the answer map
+        Find the correct and similar letters from the answer
+        Return a parsed string of the two values
+
+    Problem P.08:
+        Need to map the amount of times each unique character
+        appears in a string
+
+        Specifications:
+        string to parse                                         [P.08 init]
+        mapping data structure where keys can be strings        [dict]
+            and values can be integers
+        find unique characters in a string                      [set(string)]
+        find the amount of times a character occurs in a        [string.count(
+            string                                                  character)]
+
+        Basic Design:
+        Use a definite loop to map the count of a specific
+        letter in a string to that letter
+
+        Algorithm:
+        Initialize a mapping data structure
+        For each unique letter in the string
+            map the amount of times the letter is in the
+                    combination to the letter
+        return the map
+
+        Python Implementation:
+        map_ = {c for string.count(c) in set(string)}
+
+    Problem P.09:
+        Need to find the amount of correct letters and the
+        amount of similar letters based of number of total
+        similar letters
+
+        Specifications:
+        integer amount of similar letters                       [Problem P.07]
+        answer combination string                               [Attr P.01]
+        user's guess string
+
+        Basic Design:
+        Use a definite loop and a comparison of the two
+        strings to find the amount of correct letters and
+        subtract it from the total amount of
+        similar letters
+
+        Algorithm:
+        Initialize the amount of correct letters to 0
+        For each letter in the user's guess
+            If the letter and index of the guess and the
+                    answer are the same
+                subtract one from the similar letters
+                add one to the correct letters
+        Return the two values
+
+    Problem P.10
+        Need to parse data about the guess comparison into
+        a string that gives the user info on the accuracy
+        of their guess
+
+    Problem P.11
+        Need to determine if a character is a letter
+
+        Specifications:
+        A 1-character string to check
+        A string of lowercase letters                           [string.
+                                                                lowercase]
+        way to convert a capital letter to a lower-case         [string.lower]
+        letter
+
+        Basic Design:
+        make sure the character is lowercase then compare
+        it to lowercase letters
+
+        Algorithm:
+        convert the character to lowercase
+        test if it's in the string of lowercase letters
+        return that value
+
+
+
+
+
+class Game Representation:
+    Need to be able to update what's displayed every time       [Problem R.01]
+    the user enters data
+
+    Problem R.01:
+        Need to be able to update what's displayed every
+        time the user enters data
+
+        Specifications:
+        a header string                                         [Attr R.01]
+        list of base-guess-strings to format into               [Attr R.02]
+        list of current game data as strings to use for         [Attr R.03]
+            formatting
+
+        Basic Design:
+        Whenever the function to print the game is called
+        it takes from the current game data and a copy of
+        the base strings.
+
+        Algorithm:
+        Initialize a string as the header string
+        For each string in the base-guess-strings
+            add 2 new lines to the string
+            format a copy of the game data with the
+                    appropriate index into the base-guess
+                    -string with the appropriate index
+            add that to the string
+        add 2 new lines to the string
+        for each string in the options
+            add the option string to the string
+        add 1 new line to the string
+        Return the string
+
+
+    Problem R.02:
+        need to compare the amount of guess types to the
+        guess length and buffer the base-strings based off
+        that comparison
+
+        Specifications:
+        settings dictionary                                     [Attr M.03]
+        list of un-modified base-strings                        [Problem R.03]
+        way to find the length of a string                      [len]
+        method to handle the strings                            [Problem R.04]
+
+        Basic Design:
+        Use sequential processing to modify the strings in
+        the list of base-strings based off their length
+        relative to the longest string
+
+        Algorithm:
+        initialize the longest as the resulting integer of
+                a comparison between the length of the
+                guess-types and the guess length
+        initialize a list for modified strings
+        for each string in the list of un-modified strings
+            if the string is shorter than the longest:
+                modify it so it's as long
+                append it to the modified-strings list
+        return the modified-strings list
+
+    Problem R.03
+        Need to make a list of strings based off the
+        settings passed to the game
+
+        Specifications:
+        settings dictionary                                     [Attr M.03]
+        way to create a header from settings' guess-types       [Problem R.04]
+        function that adds a space between every character      [string.replace
+                                                                    ]
+
+        Basic Design:
+        Use the settings dictionary combined with some for
+        loops to add the base-strings for the game
+        representation to a list
+
+        Algorithm:
+        initialize a base-strings list with the header as
+                the first item
+        for the amount specified by the settings' attempts
+            append "{}|" to the base-strings list
+        return the base-strings list
+
+    Problem R.04:
+        Need to create a header string from a string of
+        sequential letters in alphabetical order
+
+        Specifications:
+        style specifications                                    [aesthetics]
+        letter string                                           [Attr R.04["Gu-
+                                                                    uess Strin-
+                                                                    g"]]
+        way to add space between string characters              [string.replace
+                                                                    ("", " ")[
+                                                                    1:-1]]
+
+        Basic Design:
+        Use the string.replace method to create a new
+        string from the letter string with spaces between
+        each character and is enclosed ins square brackets
+
+        Algorithm:
+        create a copy of the settings' guess-types
+        add space between each character excluding the ends
+        add an opening square bracket to the beginning
+        add a closing square bracket to the end
+
+    Problem R.05:
+        Need to compare the length of a string to a
+        specified length and put buffers on either side
+        based off the comparison
+
+        Specifications:
+        string to modify                                        [Problem R.02]
+        integer as a length                                     ...
+
+        Basic Design:
+        Determine the amount of spaces needed to buffer
+        each side of the string. Use control statements to
+        determine how to buffer each side of the string
+
+        Algorithm:
+        The specified length should be greater than the
+                string's current length
+        Initialize the total buffer space as the difference
+                between the length of the string and the
+                specified length
+        Initialize the buffer space as the product of " "
+                and the quotient of the total buffer space
+                and 2
+        put the buffer space between the last character and
+                the rest of the string
+        if the total buffer space isn't divisible by 2
+            add one more space to the buffer space
+        if the string's first character is "["
+            put the buffer space between the first
+                    character and the rest of the string
+        otherwise add one more space than the buffer space
+                    to the beginning of the string
+        return the resulting string
+
+    Problem R.06
+        Need to parse data from the user so it can be used
+        to update what's shown to the screen
+
+
+
+
+
+class Option:
+    Display the option to the screen
+    Call the option's function when the appropriate
+        string is entered by the user
