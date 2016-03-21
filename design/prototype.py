@@ -1,10 +1,11 @@
-import string, subprocess, random, time
+import string, subprocess, random
 
 def main():
     guess = ""
     while guess != "/q":
         answer = build_answer()
-        game_strings = ["\n[ a b c d e f ]\n\n",
+        game_strings = ["\n",
+                        "[ a b c d e f ]\n\n",
                         "    _ _ _ _   |   \n\n",
                         "    _ _ _ _   |   \n\n",
                         "    _ _ _ _   |   \n\n",
@@ -43,11 +44,11 @@ def build_answer():
     return answer[1:]
 
 def get_hint(guess, answer):
-    am = {L: answer.count(L) for L in set(answer.split())}
-    gm = {L: guess.count(L) for L in set(guess.split())}
+    guess, answer = ''.join(guess.split()), ''.join(answer.split())
+    am = {L: answer.count(L) for L in set(answer)}
+    gm = {L: guess.count(L) for L in set(guess)}
     similar = sum([min(am[L], gm[L]) for L in am if L in gm])
-    exact = sum(
-        [1 for i in xrange(len(guess.split())) if guess[2*i] == answer[2*i]])
+    exact = sum([1 for i, c in enumerate(guess) if c == answer[i]])
     similar -= exact
     return "x"*exact + "o"*similar
 

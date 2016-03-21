@@ -15,3 +15,35 @@ When the user is playing the game - in addition to guessing the combination:
         they have the option to quit the game or return to the menu.
 If the user is at the menu and there's a game still in progress, they have the
         option to continue that game
+
+
+
+
+
+
+
+Representing the Game
+
+[ a b c ] 3     [  a b  ] 2     [ a b c ] 3     [ a b c d ]     [   a b   ]
+>  _ _  | 2     > _ _ _ | 3     > _ _ _ | 3     >   _ _   |       _ _ _ _ |
+
+"[{buffer_1}{types}{buffer_1}]", "{buffer_0}{guess}{buffer_1}|{buffer_1}{hint}", "{buffer_0}{answer}"
+
+"[{}]", "{}|{}", "{}"; types: 3; length: 2;
+-> "[ {} ]", "   {}  |  {}", "   {}"
+
+"[{}]", "{}|{}", "{}"; types: 2; length: 3;
+-> "[  {}  ]", "  {} | ", "  {}"
+
+spaces to add to each buffer spot = | types - length | +1
+space to add to each buffer spot = 1
+if no "[" in the sring:
+    add amount of spaces to beginning +1
+    if "|" in the string:
+
+
+scenario types > length
+    space += (types - length)
+    only add to "{}|{}" and "{}" (length)
+scenario types < length
+    space += (length - types)

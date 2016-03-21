@@ -125,23 +125,39 @@ class Game Representation:
     should change) as the guesses displayed change.
 
     Attributes:
-        R.Attr.01 - Header (immutable):                         [Mthd R.01]
+        R.Attr.01 Placeholders (immutable, private)             []
+            A list of  each line of the game to  display to
+            the user. Each guess and the answer must be fo-
+            rmatted in.
+
+        R.Attr.02 - Header (immutable, private):                []
             A string of the guess types to pick from that
-            displays at the top of the screen
+            displays at the top of the screen.
 
-        R.Attr.02 - Guess-Lines (immutable):                    [Mthd R.01]
-            A list of formattable strings as each following
-            line under the header.
+        R.Attr.03 - Guesses (mutable, private):                 []
+            A list of  guesses/placeholders to  format into
+            the Placeholders  attribue. Each placeholder is
+            replaced with the user's guess as they make it.
+            displays at the top of the screen.
 
-        R.Attr.04 - Options (static; immutable):                []
-            a string that represents the options the user
-            can enter.
+        R.Attr.04 - Hints (mutable, private):                   []
+            A list of hints/placeholders to format into the
+            Placeholders attribue. Each placeholder is rep-
+            laced with a hint as they makes each guess.
 
     Methods:
-        R.Mthd.01 - Normalize Strings:                          [Problem R.02]
-            Use a list of uneven base-strings and even them
-            out to be stored in the header and base-strings
-            attributes.
+        R.Mthd.01 - Add Guess (public)                          []
+            Replace the current  guess placeholder with the
+            user's guess.
+
+        R.Mthd.02 - Add Hint (public)                           []
+            Replace the  current hint placeholder with  the
+            hint for the user's current guess
+
+        R.Mthd.03 - str (magic)                                 [Problem R.01]
+            Return a  string that represents  the game when
+            paired  with  the  print  keyword  or when  the
+            __str__ method is called.
 
 
 
@@ -163,7 +179,7 @@ class Option:
             accessed.
 
     Methods:
-        O.Mthd.01 - print:                                      [Problem]
+        O.Mthd.01 - str (magic):                                [Problem]
             Return a string that  represents the  option w-
             hen paired with  the print keyword or when  the
             __str__ method is called.

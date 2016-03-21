@@ -360,10 +360,10 @@ class Game Representation:
         time the user enters data
 
         Specifications:
-        a header string                                         [Attr R.01]
-        list of base-guess-strings to format into               [Attr R.02]
-        list of current game data as strings to use for         [Attr R.03]
-            formatting
+        list of placeholder strings to format into              [Attr R.01]
+        list of current guesses as strings                      [Attr R.03]
+        list of current hints as strings                        [Attr R.04]
+        list of options
 
         Basic Design:
         Whenever the function to print the game is called
@@ -371,16 +371,20 @@ class Game Representation:
         the base strings.
 
         Algorithm:
-        Initialize a string as the header string
-        For each string in the base-guess-strings
+        initialize a string by formatting the header into
+                the first item of placeholders
+        for each splaceholder in a slice of 1 to attempts+1
+                of placeholders
             add 2 new lines to the string
-            format a copy of the game data with the
-                    appropriate index into the base-guess
-                    -string with the appropriate index
+            format the relative guess and hint into the
+                    placeholder
             add that to the string
+        for each placeholder in a slice of attempts+1 to -1
+                of placeholders
+            add 2 new lines to the string
+            add the placeholder to the string
         add 2 new lines to the string
-        for each string in the options
-            add the option string to the string
+        add the last item of placeholders to the string
         add 1 new line to the string
         Return the string
 
