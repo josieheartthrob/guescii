@@ -7,6 +7,15 @@ SIMILAR = 'o'
 class GameRep(object):
     """A class that contains all the information to repreent the game. Printing an instance of the class will print the game."""
 
+    #-----Public properties-----
+
+    # Mutable
+    @property
+    def answer(self):
+        """A placeholder for the answer."""
+        return self.__answer
+
+
     #-----Public methods-----
 
     @property
@@ -33,34 +42,6 @@ class GameRep(object):
     def reveal_answer(self):
         """Not implemented."""
         return self.__reveal_answer
-
-
-    #-----Private methods-----
-
-    @property
-    def __build_placeholders(self):
-        """Assumes settings is a settings dictionary."""
-        return self.___build_placeholders
-
-    @property
-    def __buffer_string(self):
-        """Assumes string is a string;
-        length is a positive integer;
-
-        string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
-
-        Return a copy of the given string with a buffer on both ends."""
-        return self.___buffer_string
-
-    @property
-    def __find_placeholder(self):
-        """Assumes strings is a list of strings;
-        is_placeholder is a  function that takes a  string as input and
-        returns a boolean value;
-
-        Return  an integer as the index in  strings where a placeholder
-        first occurs."""
-        return self.___find_placeholder
 
 
     #-----Private properties-----
@@ -97,12 +78,53 @@ class GameRep(object):
         """A list of hints displayed to the user."""
         return self.___hints[:]
 
+
+    #-----Private methods-----
+
     @property
-    def __answer(self):
-        """A placeholder for the answer."""
-        return self.___answer
+    def __build_placeholders(self):
+        """Assumes settings is a settings dictionary."""
+        return self.___build_placeholders
+
+    @property
+    def __buffer_string(self):
+        """Assumes string is a string;
+        length is a positive integer;
+
+        string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
+
+        Return a copy of the given string with a buffer on both ends."""
+        return self.___buffer_string
+
+    @property
+    def __find_placeholder(self):
+        """Assumes strings is a list of strings;
+        is_placeholder is a  function that takes a  string as input and
+        returns a boolean value;
+
+        Return  an integer as the index in  strings where a placeholder
+        first occurs."""
+        return self.___find_placeholder
 
     #--------------------------------------------------------------------------
+
+
+    #-----Public property prescriptors-----
+
+    @answer.setter
+    def answer(self, answer):
+        # Defensive programming
+        try:
+            assert type(answer) == str, TypeError
+            assert len(answer) == self.__settings.length, ValueError
+            for c in answer:
+                assert c in self.__types, TypeError
+
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        self.__answer = answer.replace('', ' ')[1:-1]
 
 
     #-----Public method prescriptors-----
@@ -148,20 +170,6 @@ class GameRep(object):
         hints[i] = hint
         self.__hints = hints
 
-    def __reveal_answer(self, answer):
-        # Defensive programming
-        try:
-            assert type(answer) == str, TypeError
-            assert len(answer) == (self.__settings.length*2) - 1, ValueError
-            for c in answer.split():
-                assert c in self.__types, TypeError
-
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
-        self.__answer = answer
-
 
     #-----Private property prescriptors-----
 
@@ -187,11 +195,11 @@ class GameRep(object):
     def __hints(self, hints):
         # Polymorphic defensive programming
         try:
-            assert hasattr(hints, "__getitem__"), TypeError
-            assert callable(hints.__getitem__), AttributeError
+            assert hasattr(hints, "__iter__"), TypeError
+            assert callable(hints.__iter__), AttributeError
             for hint in hints:
-                assert hasattr(hint, "__getitem__"), TypeError
-                assert callable(hint.__getitem__), AttributeError
+                assert hasattr(hint, "__iter__"), TypeError
+                assert callable(hint.__iter__), AttributeError
                 for c in set(hint):
                     assert type(c) == str
                     assert c in (EXACT, SIMILAR), ValueError
@@ -246,7 +254,7 @@ class GameRep(object):
         for string in strings:
             if string.find('>') >= 0:
                 space_0 = (self.__settings.length*2) + space - 1
-                space_1 = space + 1
+                space_1 = space - 1
                 s += '{' + string.format(space_0, space_1) + '}'
             else:
                 space_0 = (self.__settings.types*2) + space - 1
@@ -307,14 +315,14 @@ class GameRep(object):
         self.___guesses = [placeholder for attempt in
                            xrange(settings.attempts)]
         self.___hints = ["" for attempt in xrange(settings.attempts)]
-        self.___answer = placeholder
+        self.__answer = placeholder
 
     def __str__(self):
-        s = '[{}]'.format(self.__placeholders[
-                          'header'].format(types=self.__header))+'\n\n'
+        s = '\n[{}]'.format(self.__placeholders[
+                            'header'].format(types=self.__header))+'\n\n'
         for i, string in enumerate(self.__placeholders['guesses']):
             s += string.format(guess=self.__guesses[i], seperator='|',
                                hint=self.__hints[i])+'\n\n'
-        s += self.__placeholders['seperator']+'\n\n'
+        s += self.__placeholders['seperator']+'\n'
         s += self.__placeholders['answer'].format(answer=self.__answer)+'\n\n'
         return s

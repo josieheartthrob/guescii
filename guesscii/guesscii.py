@@ -7,9 +7,6 @@ from settings import Settings
 class Guesscii(object):
     """The main class that handles the program."""
 
-    exact = "x"
-    similar = "o"
-
     # -----Public properties-----
 
     @property
@@ -39,7 +36,7 @@ class Guesscii(object):
     @property
     def settings(self):
         """The game's current settings."""
-        return self.__settings.copy()
+        return self.__settings
 
 
     # -----Public methods-----
@@ -57,15 +54,15 @@ class Guesscii(object):
     @property
     def continue_game(self):
         """Continue the current game."""
-        raise NotImplementedError
+        return self.__continue_game
 
     @property
     def help_page(self):
-        raise NotImplementedError
+        return self.__help_page
 
     @property
     def about_page(self):
-        raise NotImplementedError
+        return self.__about_page
 
     #--------------------------------------------------------------------------
 
@@ -80,22 +77,8 @@ class Guesscii(object):
 
         # Polymorphic defensive programming
         try:
-            # Check the game object
-            for attribute in ("main", "settings"):
-                assert hasattr(game, attribute), TypeError
-
-            # Check the game attribute
+            assert hasattr(game, 'main'), TypeError
             assert callable(game.main), AttributeError
-
-            # Check the settings attribute
-            for attribute in ('types', 'length', 'attempts'):
-                assert hasattr(settings, attribute), TypeError
-
-                # Helper variables
-                attribute_type = getattr(settings, attribute)
-
-                # Check the settings' attributes
-                assert attribute_type == int, AttributeError
 
         except AssertionError, exception:
             raise exception.args[0]
@@ -140,18 +123,32 @@ class Guesscii(object):
         self.game = Game(self.settings)
         return self.game.main()
 
+    def __continue_game(self):
+        raise NotImplementedError
+
+    def __help_page(self):
+        raise NotImplementedError
+
+    def __about_page(self):
+        raise NotImplementedError
+
 
     # -----Magic methods-----
 
     def __init__(self):
-        self.__menu = Menu()
+        self.__options = {
+            "n": Option("n", "new game", self.new_game),
+            "q": Option("q", "quit", quit),
+            "h": Option("h", "help", self.help_page),
+            "i": Option("i", "about", self.about_page),
+            "\n": ""}
+        self.__menu = Menu(self)
         self.__defaults = Settings()
         self.__settings = self.defaults
-        self.__options = {
+        self.__game = None
+
+        options = {
             "m": Option("m", "menu", self.__menu.get_choice),
-            "n": Option("n", "new game", self.new_game),
-            "c": Option("c", "continue game", self.continue_game),
-            "q": Option("q", "quit", quit),
             "s": Option("s", "settings", self.__menu.change_settings),
             "t": Option("t", "amount of letters chosen from",
                         self.settings.change_types),
@@ -159,42 +156,11 @@ class Guesscii(object):
                         self.settings.change_length),
             "a": Option("a", "attempts allowed",
                         self.settings.change_attempts),
-            "h": Option("h", "help", self.help_page),
-            "i": Option("i", "about", self.about_page),
             "b": Option("b", "back", self.__menu.back),
             "\n": ""}
-        self.__game = None
+        for key, option in options.iteritems():
+            self.__options[key] = option
 
 if __name__ == '__main__':
-    guesscii = Guescii()
+    guesscii = Guesscii()
     guesscii.main()
-
-# def play_game(settings):
-#     """Assumes settings is a settings dictionary"""
-#     combination = make_random_sequence(
-#         settings["guess types"], settings["combination length"])
-#     guess = get_guess(settings["guess types"], settings["guesses"])
-#     while guess != combination:
-#         print check_guess(guess)
-#         guess = get_guess(settings["guess types"], settings["guesses"])
-#     print "You Win!"
-#
-# def customize_settings():
-#     """returns a settings dictionary"""
-#
-#     restore_defaults = raw_input("restore defaults? y | n\n\n> ")
-#     while restore_defaults not in ("y", "n"):
-#         restore_defaults = raw_input(
-#             "invalid input\nplease type \"y\" or \"n\":\n\n> ")
-#
-#     if restore_defaults == "n":
-#         settings = {"guess types": 0, "combination length": 0, "guesses": 0}
-#         settings["guess types"] = ensure_int(
-#             "amount of guess types: ", sign="positive")
-#         settings["combination length"] = ensure_int(
-#             "length of each guess: ", sign="positive")
-#         settings["guesses"] = ensure_int(
-#             "amount of guesses: ", sign="positive")
-#     else:
-#         settings = get_defaults()
-#     return settings

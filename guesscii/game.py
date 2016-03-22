@@ -1,6 +1,9 @@
 import string, subprocess, random
 from representation import GameRep, EXACT, SIMILAR
 
+# Global aliases
+EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
+
 class Game(object):
     """The main class that runs the actual game."""
 
@@ -19,48 +22,27 @@ class Game(object):
     @property
     def __settings(self):
         """The settings dictionary."""
-        return self.___settings.copy()
+        return self.___settings
+
+    @property
+    def __types(self):
+        """A string of all the differenct characters the combination chooses from."""
+        return self.___types
 
     @property
     def __options(self):
-        """An ordered list of options to display."""
+        """A dictionary of option objects where each key is a string."""
         return self.___options
+
+    @property
+    def __option_order(self):
+        """An ordered list of options to display."""
+        return self.___option_order
 
     @property
     def __answer(self):
         """The answer combination."""
         return self.___answer
-
-    @property
-    def __answer_map(self):
-        """The answer map."""
-        return self.___answer_map.copy()
-
-    # Mutable
-    @property
-    def __guess(self):
-        """The user's current guess."""
-        return self.___guess
-
-    @property
-    def __hint(self):
-        """The current hint to display to the user."""
-        return self.___hint
-
-    @property
-    def __guess_map(self):
-        """A map of the amount of times a character occurs in the guess
-        to the relative character."""
-
-        # Defensive programming
-        try:
-            assert type(self.___guess_map) != None
-
-        except AssertionError, excpetion:
-            raise excpetion.args[0]
-
-        # Main algorithm
-        return self.___guess_map.copy()
 
 
     #-----Private methods-----
@@ -83,32 +65,38 @@ class Game(object):
 
     def __main():
         for i in xrange(self.__settings.attempts):
-            subprocess.call("cls", shell=True)
-            print self
-            self.__guess = raw_input("> ")
-            self.__hint = self.__build_hint()
-            if self.__guess in self.__options:
-                yield self.parent.options[self.__guess]
-            elif self.__guess == self.answer:
-                self.reveal_answer()
+            guess = ''
+            while (len(guess) != self.__settings.length or
+                   guess not in self.__option_order):
+
+                # Clear the screen and display the game
+                subprocess.call("cls", shell=True)
+                print self
+
+                guess = raw_input("> ")
+                # parse the guess
+                guess = ''.join([c.lower() for c in guess if
+                                 c.lower() in self.__types])
+
+            if guess in self.__option_order:
+                yield self.parent.options[guess]
+
+            self.__rep.add_guess(guess)
+
+            hint = self.__build_hint(guess)
+            self.__rep.add_hint(hint)
+
+            if guess == self.__answer:
+                self.__rep.answer = self.__answer
                 yield self.parent.options["n"]
 
 
-    #-----Private property prescriptors-----
+    #-----Private method prescriptors-----
 
-    @__guess.setter
-    def __guess(self, guess):
-        """Assumes guess is a string as long as the combination length.
-
-        Modify the guess property to the given argument."""
-
+    def ___build_hint(self, guess):
         # Polymorphic defensive programming
         try:
             assert type(guess) == str, TypeError
-
-            # Parse the guess
-            guess = ''.join(
-                [c.lower() for c in guess if c.lower() in string.lowercase])
 
             # Helper variables
             letters = string.lowercase[:self.__settings.types]
@@ -121,67 +109,15 @@ class Game(object):
         except AssertionError as excpetion:
             raise exception.args[0]
 
-        # Main algorithm
-        self.___guess = guess
-        self.__guess_map = {L: guess.count(L) for L in set(guess)}
-
-    @__guess_map.setter
-    def __guess_map(self, m):
-        """Assumes m is a mapping type where each key is a unique char-
-        acter in the guess and  each value is the amount  of times that
-        key occurs in the guess.
-
-        Modify the __guess_map property."""
-
-        # Polymorphic defensive programming
-        try:
-            for attribute in ("__iter__", "itervalues"):
-                assert hasattr(m, attribute), TypeError
-            for method in (m.__iter__, m.itervalues):
-                assert callable(method), AttributeError
-            assert m.keys() in set(self.__guess), ValueError
-            for key in m:
-                assert m[key] == self.__guess.count(key), ValueError
-
-        except AssertionError as exception:
-            raise excpetion.args[0]
+        # Helper variables
+        guess_map = {c: guess.count(c) for c in set(guess)}
+        answer_map = {c: self.__answer.count(c) for c in  set(self.__answer)}
 
         # Main algorithm
-        self.___guess_map = m
-
-    @__hint.setter
-    def __hint(self, hint):
-        """Assumes hint is a string;
-
-        hint consists  only of the characters  determined by  the EXACT
-        and SIMILAR global vairables defined in representation.py
-
-        Modify the hint property to the given argument."""
-
-        # Defensive programming
-        try:
-            assert type(hint) == str, TypeError
-            for letter in hint:
-                assert letter in (EXACT, SIMILAR), ValueError
-            assert len(hint) <= self.__settings.length, ValueError
-
-        except AssertionError as exception:
-            raise exception.args[0]
-
-        # Main algorithm
-        self.__hint = hint
-
-
-    #-----Private method prescriptors-----
-
-    def ___build_hint(self):
-        exact = sum([1 for i in xrange(len(self.__guess)) if
-                     guess[i] == answer[i]])
-        similar = (sum([min(self.__answer_map[letter],
-                            self.__guess_map[letter])
-                        for letter in self.__answer_map if
-                        letter in self.__guess_map]) - exact)
-        return EXACT*exact + SIMILAR*similar
+        exact = sum([1 for i, c in enumerate(guess) if c == answer[i]])
+        similar = (sum([min(guess_map[c], answer_map[c]) for
+                        c in answer_map if c in guess_map]) - exact)
+        return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
     def ___build_answer(self):
         answer = ""
@@ -192,9 +128,10 @@ class Game(object):
 
     #-----Magic methods-----
 
-    def __init__(self, settings, parent):
+    def __init__(self, settings, options, order=['n', 'q']):
         """Assumes settings is a settings dictionary;
-        Parent is a Guesscii object."""
+        Options is a dictionary of options;
+        Order is sequence of characters that represents the option order."""
 
         # Polymorphic defensive programming
         try:
@@ -202,39 +139,46 @@ class Game(object):
             for attribute in ('types', 'length', 'attempts'):
 
                 # Helper variables
-                attribute_is_int = type(getattr(settings, attribute)) == int
+                attribute_type = type(getattr(settings, attribute))
 
                 # Run checks
                 assert hasattr(settings, attribute), TypeError
-                assert attribute_is_int, AttributeError
+                assert attribute_type == int, AttributeError
 
-            # check parent
-            assert hasattr(parent, 'options'), TypeError
-            assert hasattr(parent.options, 'iteritems'), AttributeError
-            assert callable(parent.options.iteritems), AttributeError
-            for key, option in parent.options.iteritems():
+            # check options
+            for attribute in ('iteritems', 'keys'):
+                assert hasattr(options, attribute), TypeError
+                assert callable(getattr(options, attribute)), AttributeError
+            for key, option in options.iteritems():
                 assert type(key) == str, TypeError
-                for attribute in ('key', 'name'):
-                    assert hasattr(option, attribute), TypeError
-                    assert type(getattr(option, attribute)) == str, TypeError
+                if type(option) != str:
+                    for attribute in ('key', 'name'):
+                        assert hasattr(option, attribute), TypeError
+                        option_attribute = getattr(option, attribute)
+                        assert type(option_attribute), TypeError
+                    assert key == option.key
+                    assert callable(option)
+
+            # check order
+            assert hasattr(order, '__getitem__'), TypeError
+            assert callable(order.__getitem__), AttributeError
+            for c in order:
+                assert type(c) == str
+                assert c in options.keys()
 
         except AssertionError as exeption:
             raise exception.args[0]
 
         # Initialize attributes
-        self.___parent = parent
+        self.___options = options
         self.___settings = settings
-        self.___options = ["n", "q"]
+        self.___types = string.lowercase[:settings.types]
+        self.___option_order = order
         self.___rep = GameRep(settings)
-
         self.___answer = self.__build_answer()
-        self.___answer_map = {L: self.answer.count(L) for
-                              L in set(self.answer)}
-
-        self.___guess = None
-        self.___guess_map = None
-
-        self.___hint = None
 
     def __str__(self):
-        return self.__representation.__str__()
+        s = self.__representation.__str__()
+        for key in self.__option_order:
+            s += self.__options[key].__str__()+'\n'
+        return s
