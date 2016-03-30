@@ -1,5 +1,6 @@
 import subprocess
 from option import Option
+from page import Page
 
 class Menu(object):
     """An interface class that displays information to the user and ac-
@@ -8,116 +9,74 @@ class Menu(object):
     #-----Public methods-----
 
     @property
-    def get_choice(self):
-        """Display the menu to the screen and wait for the user to ent-
-        er a valid option.
-
-        Return the user's chosen option."""
-        return self.__get_choice
+    def push(self):
+        """Not implemented."""
+        return self._push
 
     @property
-    def change_settings(self):
-        """Not implemented."""
-        return self.__change_settings
+    def back(self):
+        """Display the previous page."""
+        return self._back
+
+
+    #-----Public properties-----
+
+    @property
+    def pages(self):
+        """A dictionary of pages."""
+        return self._pages
+
 
     #-----Private properties-----
 
-    # Immutable
+    # Mutable
     @property
-    def __options(self):
-        """A dictionary where each key is a string and each item is an option object."""
-        return self.___parent
-
-    @property
-    def __option_order(self):
-        """An ordered list of options keys."""
-        return self.___option_order
+    def _page_stack(self):
+        """The stack of pages."""
+        return self.__page_stack[:]
 
     #--------------------------------------------------------------------------
 
 
     # -----Public method prescriptors-----
 
-    def __get_choice(self):
-        # Display the menu
-        subprocess.call("cls", shell=True)
-        print self
-        option = raw_input("> ")
-        if option not in self.__option_order:
-            raise ValueError
-        return self.__parent.options[option]
+    def _get_choice(self, page):
+        key = ''
+        while key not in page.order:
+            subprocess.call('cls', shell=True)
+            print page
+            key = raw_input('> ')
+        return page.options[key]()
 
-    def __change_settings(self):
-        raise NotImplementedError
-        restore_defaults = ''
-        while restore_defaults not in ('y', 'n'):
-            restore_defaults =  raw_input('restore_defaults? y | n\n\n>')
+    def _push(self, page):
+        # Defensive programming
+        try:
+            check_page(page)
+        except AssertionError as e:
+            raise e.args[0]
 
+        self._page_stack.append(page)
 
-        types = raw_input('amount of guessing letters > ')
-        length = raw_input('combination length > ')
-        attempts = raw_input('attempts allowed > ')
-
-    # def customize_settings():
-    #     """returns a settings dictionary"""
-    #
-    #     restore_defaults = raw_input("restore defaults? y | n\n\n> ")
-    #     while restore_defaults not in ("y", "n"):
-    #         restore_defaults = raw_input(
-    #             "invalid input\nplease type \"y\" or \"n\":\n\n> ")
-    #
-    #     if restore_defaults == "n":
-    #         settings = {"guess types": 0, "combination length": 0, "guesses": 0}
-    #         settings["guess types"] = ensure_int(
-    #             "amount of guess types: ", sign="positive")
-    #         settings["combination length"] = ensure_int(
-    #             "length of each guess: ", sign="positive")
-    #         settings["guesses"] = ensure_int(
-    #             "amount of guesses: ", sign="positive")
-    #     else:
-    #         settings = get_defaults()
-    #     return settings
+    def _back(self):
+        self._page_stack = self._page_stack[:-1]
+        return self._page_stack[-1]()
 
 
     # -----Magic methods-----
 
-    def __init__(self, options, order=["n", "q", "\n", "s", "h", "i"]):
-        """Assumes options is a dictionary.
+    def __init__(self, pages, home):
+        """Assumes pages is a dictionary of Page objects;
+        home is a key in pages.
 
-        Each key  is a string, and if the item  is an object the key is
-            the same as the relative item's key attribute
-        Each item is either an option object or a string."""
+        Create a Menu object."""
         # Defensive programming
-        try:
-            # check options
-            assert hasattr(options, 'iteritems'), TypeError
-            assert callable(options.iteritems), AttributeError
-            for key, option in options.iteritems():
-                assert type(key) == str, TypeError
-                if type(option) != str:
-                    for attribute in ('key', 'name'):
-                        assert hasattr(option, attribute), TypeError
-                        option_attribute = getattr(option, attribute)
-                        assert type(option_attribute), TypeError
-                    assert key == option.key
-                    assert callable(option)
-
-            # check order
-            assert hasattr(order, '__getitem__'), TypeError
-            assert callable(order, '__getitem__'), AttributeError
-            for c in order:
-                assert type(c) == str
-                assert c in options.keys()
-
-        except AssertionError as e:
-            raise e.args[0]
+        for method in ('iteritems', 'keys'):
+            check_method(pages, method, TypeError)
+        for key, page in pages.iteritems():
+            chek_type(key, str, KeyError)
+            check_page(page)
+        assert home in pages.keys(), TypeError
 
         # Initialize attributes
-        self.___options = options
-        self.___option_order = order
-
-    def __str__(self):
-        s = "[Menu]\n\n"
-        for key in self.__option_order:
-            s += self.__options[key].__str__() + "\n"
-        return s
+        self._pages = pages
+        self.__page_stack = [pages[key] for key in stack]

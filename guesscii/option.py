@@ -8,44 +8,20 @@ class Option(object):
     @property
     def key(self):
         """The option key."""
-        return self.__key
+        return self._key
 
     @property
     def name(self):
         """The option name."""
-        return self.__name
+        return self._name
 
-    # Mutable
+
+    #-----Private properties-----
+
     @property
-    def function(self):
+    def _function(self):
         """The functionality of the option."""
-        # Defensive programming
-        try:
-            assert type(function) != None, AttributeError
-
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
         return self.__function
-
-
-    #-----Public property prescriptors-----
-
-    @function.setter
-    def function(self, function):
-        """Assumes function is a callable object.
-        Modify the function property"""
-
-        # Polymorphic defensive programming
-        try:
-            assert callable(function), TypeError
-
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
-        self.__function = function
 
 
     #-----Magic methods-----
@@ -59,20 +35,18 @@ class Option(object):
         # Defensive programming
         try:
             for arg in (key, name):
-                type(arg) == str, TypeError
-            if function:
-                assert callable(function), TypeError
-
-        except AssertionError, exception:
-            raise exception.args[0]
+                check_type(arg, str)
+            check_functionality(function)
+        except AssertionError as e:
+            raise e.args[0]
 
         # Initialize attributes
-        self.__key = key
-        self.__name = name
+        self._key = key
+        self._name = name
         self.__function = function
 
     def __str__(self):
-        return "> {0.key} - {0.name}".format(self)
+        return '> {0.key} - {0.name}'.format(self)
 
-    def __call__(self):
-        self.function()
+    def __call__(self, *args **kwargs):
+        self._function(*args, **kwargs)
