@@ -48,5 +48,5 @@ class Option(object):
     def __str__(self):
         return '> {0.key} - {0.name}'.format(self)
 
-    def __call__(self, *args **kwargs):
+    def __call__(self, *args, **kwargs):
         self._function(*args, **kwargs)

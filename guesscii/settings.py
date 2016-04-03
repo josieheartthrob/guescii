@@ -1,3 +1,5 @@
+import string
+
 class Settings(object):
     """An object that contains the data needed to create a game."""
 
@@ -8,7 +10,7 @@ class Settings(object):
         """An integer that represents the amount of letters in the pool
         of letters the game chooses from when creating a random combin-
         ation."""
-        return self._types
+        return string.lowercase[:self._types]
 
     @property
     def length(self):

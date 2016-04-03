@@ -1,4 +1,5 @@
 import subprocess
+from typing import check_options, check_order, check_type
 
 class Page(object):
 
@@ -15,18 +16,15 @@ class Page(object):
         """The order the options are displayed."""
         return self._order[:]
 
-
-    #-----Private properties-----
-
     @property
-    def _header(self):
+    def header(self):
         """The header of the page."""
-        return self.__header
+        return self._header
 
     @property
-    def _body(self):
+    def body(self):
         """The body of the page."""
-        return self.__body
+        return self._body
 
 
     #-----Public property prescriptors-----
@@ -42,17 +40,21 @@ class Page(object):
         # Main algorithm
         self._options = options
 
-
     @order.setter
     def order(self, other):
         # Defensive programming
         try:
-            check_order(other):
+            check_order(other)
         except AssertionError as e:
             raise e.args[0]
 
         # Main algorithm
         self._order = order
+
+    @body.setter
+    def body(self, other):
+        check_type(other, str, TypeError)
+        self._body = other
 
 
     #-----Magic methods-----
@@ -74,13 +76,35 @@ class Page(object):
             raise e.args[0]
 
         # Initialize attributes
-        self.__header = header
-        self.__body = body
+        self._header = header
+        self._body = body
         self._options = options
-        self.__order = order
+        self._order = order
 
     def __str__(self):
-        s = '[{}]\n\n{}\n'.format(self._header, self._body)
+        s = '[{}]\n\n{}\n'.format(self.header, self.body)
         for key in self._order:
             s += self.options[key] + '\n'
         return s
+
+    def __call__(self, parse=None):
+        # Defensive programming
+        try:
+            check_functionality(parse, TypeError)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        key = ''
+        while key not in self.options.keys():
+            subprocess.call('cls', shell=True)
+            print page
+            if parse:
+                try:
+                    key, args, kwargs = parse(raw_input('> '))
+                except ValueError:
+                    raise TypeError
+            else:
+                key = raw_input('> ')
+                args, kwargs = (), {}
+        return self.options[key](*args, **kwargs)

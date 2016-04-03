@@ -121,7 +121,6 @@ class Guesscii(object):
 
     def _main(self):
         option = self.options["m"]
-        kwargs = {}
         while True:
             try:
                 option, kwargs = option(**kwargs)

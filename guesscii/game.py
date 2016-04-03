@@ -1,5 +1,6 @@
 import string, subprocess, random
-from representation import GameRep, EXACT, SIMILAR
+from gamedata import Data, EXACT, SIMILAR
+from typing import *
 
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
@@ -13,105 +14,81 @@ class Game(object):
     def main(self):
         """Run the actual game.
         Yield an option object."""
-        return self.__main
+        return self._main
 
 
     #-----Private properties-----
 
     # Immutable
     @property
-    def __settings(self):
-        """The settings dictionary."""
-        return self.___settings
+    def _settings(self):
+        """The settings object."""
+        return self.__settings
 
     @property
-    def __types(self):
+    def _types(self):
         """A string of all the differenct characters the combination chooses from."""
-        return self.___types
+        return self.__types
 
     @property
-    def __options(self):
-        """A dictionary of option objects where each key is a string."""
-        return self.___options
-
-    @property
-    def __option_order(self):
-        """An ordered list of options to display."""
-        return self.___option_order
-
-    @property
-    def __answer(self):
+    def _answer(self):
         """The answer combination."""
-        return self.___answer
+        return self.__answer
 
 
     #-----Private methods-----
 
     @property
-    def __build_answer(self):
+    def _build_answer(self):
         """Create a  randomized string of lower-case  letters based off
         the settings."""
-        return self.___build_answer
+        return self.__build_answer
 
     @property
-    def __build_hint(self):
+    def _build_hint(self):
         """Return a string that gives the user info about their guess."""
-        return self.___build_hint
+        return self.__build_hint
 
     #--------------------------------------------------------------------------
 
 
     #-----Public method prescriptors-----
 
-    def __main():
-        for i in xrange(self.__settings.attempts):
-            guess = ''
-            while (len(guess) != self.__settings.length or
-                   guess not in self.__option_order):
+    def _main():
+        for i in xrange(self._settings.attempts):
+            guess = self._page(self._parse_user_input)
+            self._data.add_guess(guess)
 
-                # Clear the screen and display the game
-                subprocess.call("cls", shell=True)
-                print self
+            hint = self._build_hint(guess)
+            self._data.add_hint(hint)
 
-                guess = raw_input("> ")
-                # parse the guess
-                guess = ''.join([c.lower() for c in guess if
-                                 c.lower() in self.__types])
+            if guess == self._answer:
+                self._data.answer = self._answer
+                yield self._page.options['n']
+            elif guess in self._page.order:
+                yield self._page.options[guess]
 
-            if guess in self.__option_order:
-                yield self.parent.options[guess]
-
-            self.__rep.add_guess(guess)
-
-            hint = self.__build_hint(guess)
-            self.__rep.add_hint(hint)
-
-            if guess == self.__answer:
-                self.__rep.answer = self.__answer
-                yield self.parent.options["n"]
+            self._page.body = self._data.__str__()
 
 
     #-----Private method prescriptors-----
 
-    def ___build_hint(self, guess):
+    def __build_hint(self, guess):
         # Polymorphic defensive programming
         try:
-            assert type(guess) == str, TypeError
-
-            # Helper variables
-            letters = string.lowercase[:self.__settings.types]
-
-            # Check the guess
-            for c in guess:
-                assert c in letters, ValueError
-            assert len(guess) == self.__settings.length, ValueError
-
+            check_type(guess, str, TypeError)
+            check_inside(guess, self._types, ValueError)
         except AssertionError as excpetion:
             raise exception.args[0]
 
+        # Here's a funny thing: In Tatham's source code they reference a wolfr-
+        # am alpha page that  has the formula for this. But I actually  figured
+        # this out before  I even knew Tatham's code was  open-source - because
+        # I'm a fucking math-genius.
+
         # Helper variables
         guess_map = {c: guess.count(c) for c in set(guess)}
-        answer_map = {c: self.__answer.count(c) for c in  set(self.__answer)}
+        answer_map = {c: self._answer.count(c) for c in  set(self._answer)}
 
         # Main algorithm
         exact = sum([1 for i, c in enumerate(guess) if c == answer[i]])
@@ -119,66 +96,51 @@ class Game(object):
                         c in answer_map if c in guess_map]) - exact)
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
-    def ___build_answer(self):
-        answer = ""
-        for i in xrange(self.__settings.length):
-            answer += random.choice(self.__settings.types)
+    def __build_answer(self):
+        answer = ''
+        for i in xrange(self._settings.length):
+            answer += random.choice(self._types)
         return answer
+
+    def __parse_user_input(self, data):
+        # Defensive programming
+        try:
+            check_type(data, str, TypeError)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        key = self._guess_key
+        if data in self._page.order:
+            key, data = data, ()
+        else:
+            data = re.sub(' ', '', data)
+            try:
+                check_combo(data, self._settings)
+            except AssertionError:
+                key = None
+        return key, (data,), {}
+
 
 
     #-----Magic methods-----
 
-    def __init__(self, settings, options, order=['n', 'q']):
+    def __init__(self, settings, options, order):
         """Assumes settings is a settings dictionary;
         Options is a dictionary of options;
         Order is sequence of characters that represents the option order."""
 
         # Polymorphic defensive programming
         try:
-            # check settings
-            for attribute in ('types', 'length', 'attempts'):
-
-                # Helper variables
-                attribute_type = type(getattr(settings, attribute))
-
-                # Run checks
-                assert hasattr(settings, attribute), TypeError
-                assert attribute_type == int, AttributeError
-
-            # check options
-            for attribute in ('iteritems', 'keys'):
-                assert hasattr(options, attribute), TypeError
-                assert callable(getattr(options, attribute)), AttributeError
-            for key, option in options.iteritems():
-                assert type(key) == str, TypeError
-                if type(option) != str:
-                    for attribute in ('key', 'name'):
-                        assert hasattr(option, attribute), TypeError
-                        option_attribute = getattr(option, attribute)
-                        assert type(option_attribute), TypeError
-                    assert key == option.key
-                    assert callable(option)
-
-            # check order
-            assert hasattr(order, '__getitem__'), TypeError
-            assert callable(order.__getitem__), AttributeError
-            for c in order:
-                assert type(c) == str
-                assert c in options.keys()
-
+            check_settings(settings)
+            check_options(options)
+            check_order(order, options)
         except AssertionError as exeption:
             raise exception.args[0]
 
         # Initialize attributes
-        self.___options = options
-        self.___settings = settings
-        self.___types = string.lowercase[:settings.types]
-        self.___option_order = order
-        self.___rep = GameRep(settings)
-        self.___answer = self.__build_answer()
-
-    def __str__(self):
-        s = self.__representation.__str__()
-        for key in self.__option_order:
-            s += self.__options[key].__str__()+'\n'
-        return s
+        self.__settings = settings
+        self.__types = string.lowercase[:settings.types]
+        self.__data = Data(settings)
+        self.__page = Page(self._types, self._data.__str__(), options, order)
+        self.__answer = self._build_answer()
