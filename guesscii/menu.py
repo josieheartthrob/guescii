@@ -40,10 +40,8 @@ class Menu(object):
 
     # -----Magic methods-----
 
-    def __init__(self, home):
-        """Assumes home is a page object that doesn't have a back option.
-
-        Create a Menu object."""
+    def __init__(self):
+        """Create a Menu object."""
 
         # Defensive programming
         try:
@@ -54,7 +52,7 @@ class Menu(object):
             raise e.args[0]
 
         # Main algorithm
-        self.__page_stack = [home]
+        self.__page_stack = []
 
     def __call__(self):
         self._page_stack[-1]()

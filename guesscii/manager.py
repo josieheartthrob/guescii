@@ -134,27 +134,30 @@ class Guesscii(object):
     # -----Magic methods-----
 
     def __init__(self):
-        self._options = {
-            "n": Option("n", "new game", self.new_game),
-            "q": Option("q", "quit", quit),
-            "h": Option("h", "help", self.help_page),
-            "i": Option("i", "about", self.about_page),
-            "\n": ""}
-        self._menu = Menu(self._options)
-        self.__pages = {'h': '\n[How to Play]\n\ncoming soon\n',
-                        'i': '\n[About]\n\ncoming soon\n'}
         self._defaults = Settings()
         self._settings = self.defaults
+        self._menu = Menu()
+        self._pages =  {
+            'settings': Page('Settings', '', {
+                'r': Option('r', 'restore defaults', None),
+                't': Option('t', 'types', None),
+                'l': Option('l', 'length', None),
+                'a': Option('a', 'attempts', None),
+                'b': Option('b', 'back', self.menu.back),
+                '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'])
+            'help': Page('Help', 'coming soon', {
+                'b': Option('b', 'back', self.menu.back)}, ['b']),
+            'about': Page('About', 'coming soon', {
+                'b': Option('b', 'back', self.menu.back)}, ['b'])}
+        self.pages['menu'] = Page('Menu', '', {
+            'n': Option('n', 'new game', self.new_game),
+            'q': Option('q', 'quit', quit),
+            's': Option('s', 'settings', self.pages['settings'])
+            'h': Option('h', 'help', self.pages['help']),
+            'i': Option('i', 'about', self.pages['about']),
+            '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'])
+        self.menu.push(self.pages['menu'])
         self._game = None
-
-        options = {
-            "m": Option("m", "menu", self._menu.get_choice),
-            "s": Option("s", "settings", self._menu.change_settings),
-            "b": Option("b", "back", self._menu.back),
-            "\n": ""}
-        for key, option in self.options.iteritems():
-            options[key] = option
-        self.options = options
 
 #        {'m': Page('Menu', '', options, order),
 #                       's': Page('Settings', '',
