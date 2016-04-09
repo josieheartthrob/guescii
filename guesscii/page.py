@@ -87,10 +87,10 @@ class Page(object):
             s += self.options[key] + '\n'
         return s
 
-    def __call__(self, parse=None):
+    def __call__(self, parse=lambda x: (x, (), {})):
         # Defensive programming
         try:
-            check_functionality(parse, TypeError)
+            check_callable(parse, TypeError)
         except AssertionError as e:
             raise e.args[0]
 
@@ -99,12 +99,8 @@ class Page(object):
         while key not in self.options.keys():
             subprocess.call('cls', shell=True)
             print page
-            if parse:
-                try:
-                    key, args, kwargs = parse(raw_input('> '))
-                except ValueError:
-                    raise TypeError
-            else:
-                key = raw_input('> ')
-                args, kwargs = (), {}
-        return self.options[key](*args, **kwargs)
+            try:
+                key, args, kwargs = parse(raw_input('> '))
+                return self.options[key](*args, **kwargs)
+            except (ValueError, TypeError):
+                raise TypeError

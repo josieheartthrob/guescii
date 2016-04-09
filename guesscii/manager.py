@@ -38,32 +38,6 @@ class Guesscii(object):
         return self._settings
 
 
-    # -----Public methods-----
-
-    @property
-    def main(self):
-        """The loop that runs the program."""
-        return self._main
-
-    @property
-    def new_game(self):
-        """Play the game with the current settings."""
-        return self._new_game
-
-    @property
-    def continue_game(self):
-        """Continue the current game."""
-        return self._continue_game
-
-    @property
-    def display_page(self):
-        """Assumes page  is a character that  accesses the  appropriate
-        page from the pages dictionary"""
-        return self._display_page
-
-    #--------------------------------------------------------------------------
-
-
     # -----Public property prescriptors-----
 
     @game.setter
@@ -116,10 +90,14 @@ class Guesscii(object):
         # Main algorithm
         self.options = options
 
+    #--------------------------------------------------------------------------
 
-    # -----Public method prescriptors-----
 
-    def _main(self):
+    # -----Public methods-----
+
+    @property
+    def main(self):
+        """The loop that runs the program."""
         option = self.options["m"]
         while True:
             try:
@@ -127,12 +105,16 @@ class Guesscii(object):
             except ValueError:
                 continue
 
-    def _new_game(self):
+    @property
+    def new_game(self):
+        """Play the game with the current settings."""
         del self.game
         self.game = Game(self.settings)
         return self.game.main()
 
-    def _continue_game(self):
+    @property
+    def continue_game(self):
+        """Continue the current game."""
         # Defensive programming
         try:
             check_None(self.game, AttributeError)
@@ -141,6 +123,12 @@ class Guesscii(object):
 
         # Main algorithm
         return self.game.main()
+
+    @property
+    def display_page(self):
+        """Assumes page  is a character that  accesses the  appropriate
+        page from the pages dictionary"""
+        return self._display_page
 
 
     # -----Magic methods-----

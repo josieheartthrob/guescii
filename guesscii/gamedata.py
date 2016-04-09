@@ -17,29 +17,6 @@ class Data(object):
         return self._answer
 
 
-    #-----Public methods-----
-
-    @property
-    def add_guess(self):
-        """Assumes guess is a string
-
-        guess is as  long as the combination  length and  only contains
-        letters from the combination letter pool.
-
-        Modify the private guesses property of the reprentation"""
-        return self._add_guess
-
-    @property
-    def add_hint(self):
-        """Assumes hint is a string
-
-        hint is less than or equal to the combination length and is on-
-        ly composed of the EXACT and SIMILAR global variables
-
-        Replace the next placeholder with an actual game hint."""
-        return self._add_hint
-
-
     #-----Private properties-----
 
     # Immutable
@@ -65,45 +42,6 @@ class Data(object):
         return self.__hints[:]
 
 
-    #-----Private methods-----
-
-    @property
-    def _build_placeholders(self):
-        """Assumes settings is a settings dictionary."""
-        return self.__build_placeholders
-
-    @property
-    def _buffer_string(self):
-        """Assumes string is a string;
-        length is a positive integer;
-
-        string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
-
-        Return a copy of the given string with a buffer on both ends."""
-        return self.__buffer_string
-
-    @property
-    def _find_placeholder(self):
-        """Assumes strings is a list of strings;
-        is_placeholder is a  function that takes a  string as input and
-        returns a boolean value;
-
-        Return  an integer as the index in  strings where a placeholder
-        first occurs."""
-        return self.__find_placeholder
-
-    @property
-    def _add_item(self):
-        """Assumes attribute is a representation attribute;
-        item is an object with the relevant typing;
-        function is a filter function for the _find_placeholder method;
-
-        add an item to the specified attribute."""
-        return self.__add_item
-
-    #--------------------------------------------------------------------------
-
-
     #-----Public property prescriptors-----
 
     @answer.setter
@@ -116,29 +54,6 @@ class Data(object):
 
         # Main algorithm
         self._answer = answer.replace('', ' ')[1:-1]
-
-
-    #-----Public method prescriptors-----
-
-    def _add_guess(self, guess):
-        # Defensive programming
-        try:
-            check_combo(guess, self._settings)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
-        self._add_item('_guesses', guess, lambda s: s.find("_") >= 0)
-
-    def _add_hint(self, hint):
-        # Defensive programming
-        try:
-            check_hint(hint, (EXACT, SIMILAR), self._settings.length)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
-        self._add_item('_hints', hint, lambda s: len(s) == 0)
 
 
     #-----Private property prescriptors-----
@@ -167,10 +82,49 @@ class Data(object):
         # Main algorithm
         self.__hints = hints
 
+    #--------------------------------------------------------------------------
 
-    #-----Private method prescriptors-----
 
-    def __build_placeholders(self):
+
+    #-----Public methods-----
+
+    def add_guess(self, guess):
+        """Assumes guess is a combo string
+        Modify the private guesses property of the reprentation"""
+
+        # Defensive programming
+        try:
+            check_combo(guess, self._settings)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        self._add_item('_guesses', guess, lambda s: s.find("_") >= 0)
+
+    def add_hint(self, hint):
+        """Assumes hint is a string
+
+        hint is less than or equal to the combination length and is on-
+        ly composed of the EXACT and SIMILAR global variables
+
+        Replace the next placeholder with an actual game hint."""
+
+        # Defensive programming
+        try:
+            check_hint(hint, (EXACT, SIMILAR), self._settings.length)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        self._add_item('_hints', hint, lambda s: len(s) == 0)
+
+
+    #-----Private methods-----
+
+    def _build_placeholders(self):
+        """Create a placeholders dictionary based off of the
+        gamedata settings."""
+
         # Helper variables
         types = self._settings.types
         length = self._settings.length
@@ -193,8 +147,15 @@ class Data(object):
 
         return placeholders
 
-    def __buffer_string(self, strings, space):
-        # Polymorphic defensive programming
+    def _buffer_string(self, strings, space):
+        """Assumes string is a string;
+        length is a positive integer;
+
+        string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
+
+        Return a copy of the given string with a buffer on both ends."""
+
+        # Defensive programming
         try:
             check_method(string, '__iter__', TypeError)
             for s in strings:
@@ -216,7 +177,14 @@ class Data(object):
 
         return s
 
-    def __find_placeholder(self, strings, is_placeholder):
+    def _find_placeholder(self, strings, is_placeholder):
+        """Assumes strings is a list of strings;
+        is_placeholder is a  function that takes a  string as input and
+        returns a boolean value;
+
+        Return  an integer as the index in  strings where a placeholder
+        first occurs."""
+
         # Polymorphic defensive programming
         try:
             for attribute in ('__iter__', '__getitem__'):
@@ -233,7 +201,13 @@ class Data(object):
                 return i
         raise IndexError
 
-    def __add_item(self, attribute, item, function):
+    def _add_item(self, attribute, item, function):
+        """Assumes attribute is a representation attribute;
+        item is an object with the relevant typing;
+        function is a filter function for the _find_placeholder method;
+
+        add an item to the specified attribute."""
+
         # Defensive programming
         try:
             check_type(attribute, str, TypeError)

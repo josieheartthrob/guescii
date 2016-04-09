@@ -8,53 +8,30 @@ EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
 class Game(object):
     """The main class that runs the actual game."""
 
+        #-----Private properties-----
+
+        # Immutable
+        @property
+        def _settings(self):
+            """The settings object."""
+            return self.__settings
+
+        @property
+        def _types(self):
+            """A string of all the differenct characters the combination chooses from."""
+            return self.__types
+
+        @property
+        def _answer(self):
+            """The answer combination."""
+            return self.__answer
+
+
     #-----Public methods-----
 
-    @property
     def main(self):
         """Run the actual game.
         Yield an option object."""
-        return self._main
-
-
-    #-----Private properties-----
-
-    # Immutable
-    @property
-    def _settings(self):
-        """The settings object."""
-        return self.__settings
-
-    @property
-    def _types(self):
-        """A string of all the differenct characters the combination chooses from."""
-        return self.__types
-
-    @property
-    def _answer(self):
-        """The answer combination."""
-        return self.__answer
-
-
-    #-----Private methods-----
-
-    @property
-    def _build_answer(self):
-        """Create a  randomized string of lower-case  letters based off
-        the settings."""
-        return self.__build_answer
-
-    @property
-    def _build_hint(self):
-        """Return a string that gives the user info about their guess."""
-        return self.__build_hint
-
-    #--------------------------------------------------------------------------
-
-
-    #-----Public method prescriptors-----
-
-    def _main():
         for i in xrange(self._settings.attempts):
             guess = self._page(self._parse_user_input)
             self._data.add_guess(guess)
@@ -71,9 +48,19 @@ class Game(object):
             self._page.body = self._data.__str__()
 
 
-    #-----Private method prescriptors-----
+    #-----Private methods-----
 
-    def __build_hint(self, guess):
+    def _build_answer(self):
+        """Create a  randomized string of lower-case  letters based off
+        the settings."""
+        answer = ''
+        for i in xrange(self._settings.length):
+            answer += random.choice(self._types)
+        return answer
+
+    def _build_hint(self, guess):
+        """Assumes guess is a combo string;
+        Return a string that gives the user info about their guess."""
         # Polymorphic defensive programming
         try:
             check_type(guess, str, TypeError)
@@ -96,31 +83,37 @@ class Game(object):
                         c in answer_map if c in guess_map]) - exact)
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
-    def __build_answer(self):
-        answer = ''
-        for i in xrange(self._settings.length):
-            answer += random.choice(self._types)
-        return answer
+        def __parse_user_input(self, data):
+            """Assumes data is a string.
+            Parse data to call an option or evaluate a guess."""
 
-    def __parse_user_input(self, data):
-        # Defensive programming
-        try:
-            check_type(data, str, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+            # Defensive programming
+            try:
+                check_type(data, str, TypeError)
+            except AssertionError as e:
+                raise e.args[0]
 
-        # Main algorithm
-        key = self._guess_key
-        if data in self._page.order:
-            key, data = data, ()
-        else:
-            data = re.sub(' ', '', data)
+            # Helper variables
+            dont_parse = lambda x: (x, (), {})
+
+            # Main algorithm
+            if data in self._page.order:
+                return dont_parse(data)
+            else:
+                return self._data_to_guess(data)
+
+        def __data_to_guess(self, data):
+            """Assumes data is  a string.
+            Create a new combo string based off data.
+            Raise an exception if it can't be translated."""
+
+            # Integrated defensive programming and main algorithm
+            guess = re.sub(' ', '', data)
             try:
                 check_combo(data, self._settings)
-            except AssertionError:
-                key = None
-        return key, (data,), {}
-
+                return guess
+            except AssertionError as e:
+                raise e.args[0]
 
 
     #-----Magic methods-----

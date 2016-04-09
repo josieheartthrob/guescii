@@ -6,20 +6,6 @@ class Menu(object):
     """An interface class that displays information to the user and ac-
     cesses data from its parent Guesscii instance."""
 
-    #-----Public methods-----
-
-    @property
-    def push(self):
-        """Assumes page is a page object
-        push the specified page to the stack."""
-        return self._push
-
-    @property
-    def back(self):
-        """Display the previous page."""
-        return self._back
-
-
     #-----Private properties-----
 
     # Mutable
@@ -29,9 +15,13 @@ class Menu(object):
         return self.__page_stack[:]
 
 
-    # -----Public method prescriptors-----
+    #-----Public methods-----
 
-    def _push(self, page):
+    @property
+    def push(self, page):
+        """Assumes page is a page object
+        push the specified page to the stack."""
+
         # Defensive programming
         try:
             check_page(page)
@@ -40,7 +30,10 @@ class Menu(object):
 
         self._page_stack.append(page)
 
-    def _back(self):
+    @property
+    def back(self):
+        """Display the previous page."""
+
         self._page_stack = self._page_stack[:-1]
         return self()
 
