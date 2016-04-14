@@ -33,17 +33,23 @@ class Game(object):
         """Run the actual game.
         Yield an option object."""
         for i in xrange(self._settings.attempts):
-            guess = self._page(self._parse_user_input)
-            self._data.add_guess(guess)
-
-            hint = self._build_hint(guess)
-            self._data.add_hint(hint)
+            guess = self._page()
 
             if guess == self._answer:
                 self._data.answer = self._answer
                 yield self._page.options['n']
             elif guess in self._page.order:
                 yield self._page.options[guess]
+
+            try:
+                check_combo(guess, self._settings)
+            except AssertionError as e:
+                raise e.args[0]
+
+            self._data.add_guess(guess)
+
+            hint = self._build_hint(guess)
+            self._data.add_hint(hint)
 
             self._page.body = self._data.__str__()
 
@@ -83,7 +89,7 @@ class Game(object):
                         c in answer_map if c in guess_map]) - exact)
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
-        def __parse_user_input(self, data):
+        def _parse_user_input(self, data):
             """Assumes data is a string.
             Parse data to call an option or evaluate a guess."""
 
@@ -93,16 +99,13 @@ class Game(object):
             except AssertionError as e:
                 raise e.args[0]
 
-            # Helper variables
-            dont_parse = lambda x: (x, (), {})
-
             # Main algorithm
             if data in self._page.order:
-                return dont_parse(data)
+                return data, (), {}
             else:
-                return self._data_to_guess(data)
+                return self._data_to_guess(data), (), {}
 
-        def __data_to_guess(self, data):
+        def _data_to_guess(self, data):
             """Assumes data is  a string.
             Create a new combo string based off data.
             Raise an exception if it can't be translated."""
@@ -135,5 +138,6 @@ class Game(object):
         self.__settings = settings
         self.__types = string.lowercase[:settings.types]
         self.__data = Data(settings)
-        self.__page = Page(self._types, self._data.__str__(), options, order)
+        self.__page = Page(self._types, self._data.__str__(), options,
+                           order, self._parse_user_input)
         self.__answer = self._build_answer()

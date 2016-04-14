@@ -1,6 +1,15 @@
 import subprocess
 from typing import check_options, check_order, check_type
 
+def parse_input(data):
+    # Defensive programming
+    try:
+        check_type(data, str, TypeError)
+    except AssertionError as e:
+        raise e.args[0]
+
+
+
 class Page(object):
 
     #-----Public properties-----
@@ -59,7 +68,8 @@ class Page(object):
 
     #-----Magic methods-----
 
-    def __init__(self, header, body, options, order):
+    def __init__(self, header, body, options, order,
+                 parse=lambda x: (x, (), {})):
         """Assumes header and body are strings;
         options is a dictionary of options;
         order is the ordre to display the options;
@@ -72,6 +82,7 @@ class Page(object):
                 check_type(arg, str)
             check_options(options)
             check_order(order)
+            check_callable(parse, TypeError)
         except AssertionError as e:
             raise e.args[0]
 
@@ -80,6 +91,7 @@ class Page(object):
         self._body = body
         self._options = options
         self._order = order
+        self._parse = parse
 
     def __str__(self):
         s = '[{}]\n\n{}\n'.format(self.header, self.body)
@@ -87,20 +99,39 @@ class Page(object):
             s += self.options[key] + '\n'
         return s
 
-    def __call__(self, parse=lambda x: (x, (), {})):
-        # Defensive programming
-        try:
-            check_callable(parse, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
+    def __call__(self,):
         key = ''
         while key not in self.options.keys():
             subprocess.call('cls', shell=True)
             print page
             try:
-                key, args, kwargs = parse(raw_input('> '))
-                return self.options[key](*args, **kwargs)
+                key, args, kwargs = self._parse(raw_input('> '))
             except (ValueError, TypeError):
                 raise TypeError
+        return self.options[key], args, kwargs
+
+# option, args, kwargs = menu page, (), {}
+# while True
+#     option, args, kwargs = option(*args, **kwargs)
+
+# call settings page option
+#     display page
+#     get [change settings] input from user
+#     parse input to option key, args, kwargs
+#         parse input to settings
+#         key = settings key, args = (settings), kwargs = {}
+#         return key, args, kwargs
+#     return option dict[settings key], args, kwargs
+
+# call change settings option with settings arg
+#     change current settings
+#     change settings page body to inform user changes were saved
+#     return settings page option
+
+# call settings page option
+#     display the page
+#     get [go back] input from the user
+#     parse input to option key, args, kwargs
+#         key = user input, args = (), kwargs = {}
+#         return key, args, kwargs
+#     return option dict[key], args, kwargs

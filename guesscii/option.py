@@ -1,3 +1,5 @@
+from typing import *
+
 class Option(object):
     """An option to display on the screen.
     Options can be called for their functionality."""
@@ -35,8 +37,8 @@ class Option(object):
         # Defensive programming
         try:
             for arg in (key, name):
-                check_type(arg, str)
-            check_functionality(function)
+                check_type(arg, str, TypeError)
+            check_functionality(function, TypeError)
         except AssertionError as e:
             raise e.args[0]
 
@@ -49,4 +51,4 @@ class Option(object):
         return '> {0.key} - {0.name}'.format(self)
 
     def __call__(self, *args, **kwargs):
-        self._function(*args, **kwargs)
+        return self._function(*args, **kwargs)

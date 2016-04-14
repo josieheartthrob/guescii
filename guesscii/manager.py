@@ -1,4 +1,4 @@
-import random, subprocess
+import random, subprocess, re
 from menu import Menu
 from game import Game
 from option import Option
@@ -7,15 +7,15 @@ from settings import Settings
 class Guesscii(object):
     """The main class that handles the program."""
 
-    # -----Public properties-----
+    # -----Private properties-----
 
     @property
-    def options(self):
+    def _options(self):
         """The options dictionary."""
-        return self._options.copy()
+        return self.__options.copy()
 
     @property
-    def game(self):
+    def _game(self):
         """A game instance."""
 
         # Defensive programming
@@ -25,23 +25,23 @@ class Guesscii(object):
             raise e.args[0]
 
         # Main algorithm
-        return self._game
+        return self.__game
 
     @property
-    def defaults(self):
+    def _defaults(self):
         """The default settings."""
-        return self._defaults
+        return self.__defaults
 
     @property
-    def settings(self):
+    def _settings(self):
         """The game's current settings."""
-        return self._settings
+        return self.__settings
 
 
-    # -----Public property prescriptors-----
+    # -----Private property prescriptors-----
 
-    @game.setter
-    def game(self, game):
+    @_game.setter
+    def _game(self, game):
         """Assumes game is a Game object.
 
         Modify the game property."""
@@ -54,15 +54,15 @@ class Guesscii(object):
             raise e.args[0]
 
         # Main algorithm
-        self._game = game
+        self.__game = game
 
-    @game.deleter
-    def game(self):
-        self._game = None
+    @_game.deleter
+    def _game(self):
+        self.__game = None
 
 
-    @settings.setter
-    def settings(self, settings):
+    @_settings.setter
+    def _settings(self, settings):
         """Assumes settings is a settings object.
 
         Modify the current settings."""
@@ -74,10 +74,10 @@ class Guesscii(object):
             raise e.args[0]
 
         # Main algorithm
-        self._settings = settings
+        self.__settings = settings
 
-    @options.setter
-    def options(self, options):
+    @_options.setter
+    def _options(self, options):
         """Assumes options is a dictionary where each value is an opti-
         on and each key is the key for that option."""
 
@@ -88,31 +88,19 @@ class Guesscii(object):
             raise e.args[0]
 
         # Main algorithm
-        self.options = options
+        self.__options = options
 
     #--------------------------------------------------------------------------
 
 
     # -----Public methods-----
 
-    @property
-    def main(self):
-        """The loop that runs the program."""
-        option = self.options["m"]
-        while True:
-            try:
-                option, kwargs = option(**kwargs)
-            except ValueError:
-                continue
-
-    @property
     def new_game(self):
         """Play the game with the current settings."""
-        del self.game
-        self.game = Game(self.settings)
-        return self.game.main()
+        del self._game
+        self._game = Game(self.settings)
+        option = self._game.main()
 
-    @property
     def continue_game(self):
         """Continue the current game."""
         # Defensive programming
@@ -122,51 +110,100 @@ class Guesscii(object):
             raise e.args[0]
 
         # Main algorithm
-        return self.game.main()
+        option = self._game.main()
 
-    @property
-    def display_page(self):
-        """Assumes page  is a character that  accesses the  appropriate
-        page from the pages dictionary"""
-        return self._display_page
+
+    # -----Private methods-----
+
+    def _restore_defaults(self):
+        self._settings = self._defaults
+
+    def parse_menu(self, data):
+        # Defensive programming
+        try:
+            check_type(data, str, TypeError)
+        except AssertionError as e:
+            raise e.args[0]
+
+        if data == 'n':
+            return data, (self._settings), {}
+        elif data in self._pages['settings'].order:
+            return data, (), {}
+        else:
+            raise ValueError
+
+    def _parse_settings(self, data):
+        # Defensive programming
+        try:
+            check_type(data, str, TypeError)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Main algorithm
+        if data in self._pages['settings'].order:
+            return data, (), {}
+        else:
+            return 's', (data), {}
+
+    def _data_to_settings(self, data):
+        # Defensive programming
+        try:
+            check_type(data, str, TypeError)
+        except AssertionError as e:
+            raise e.args[0]
+
+        # Helper variables
+        maximums = {'t': 30, 'l': 20, 'a': 100}
+        pattern = re.compile(r'[tla]\W*\d+')
+
+        # Main algorithm
+        settings = {}
+        for setting in re.findall(pattern, data):
+            key = settings[0]
+            settings[key] = int(re.findall(r'\d+', setting))
+            if settings[key] > maximums[key]:
+                raise ValueError
+        check_inside(settings.keys(), 'tla', ValueError)
+        settings = Settings(types=settings['t'],
+            length=settings['l'], attempts=settings['a'])
+        return settings
 
 
     # -----Magic methods-----
 
     def __init__(self):
-        self._defaults = Settings()
-        self._settings = self.defaults
-        self._menu = Menu()
+        self.__defaults = Settings()
+        self.__settings = self.defaults
+        self.__menu = Menu()
         self._pages =  {
-            'settings': Page('Settings', '', {
-                'r': Option('r', 'restore defaults', None),
-                't': Option('t', 'types', None),
-                'l': Option('l', 'length', None),
-                'a': Option('a', 'attempts', None),
-                'b': Option('b', 'back', self.menu.back),
-                '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'])
             'help': Page('Help', 'coming soon', {
                 'b': Option('b', 'back', self.menu.back)}, ['b']),
             'about': Page('About', 'coming soon', {
-                'b': Option('b', 'back', self.menu.back)}, ['b'])}
-        self.pages['menu'] = Page('Menu', '', {
+                'b': Option('b', 'back', self.menu.back)}, ['b']),
+            'types': Page('Change amount of letters to choose from', '', {
+                'c': Option('c', 'cancel', self.menu.back)}, ['c']),
+            'length': Page('Change the length of the combination', '', {
+                'c': Option('c', 'cancel', self.menu.back)}, ['c']),
+            'attempts': Page('Change the amount of attempts allowed', '', {
+                'c': Option('c', 'cancel', self.menu.back)}, ['c'])}
+        self._pages['settings'] = Page('Settings', '', {
+            'r': Option('r', 'restore defaults', self._restore_defaults),
+            't': Option('t', 'types', self._pages['types']),
+            'l': Option('l', 'length', self._pages['length']),
+            'a': Option('a', 'attempts', self._pages['attempts']),
+            'b': Option('b', 'back', self.menu.back),
+            's': Options('s', 'change all settings', self._parse_settings)
+            '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
+            self._parse_settings)
+        self._pages['menu'] = Page('Menu', '', {
             'n': Option('n', 'new game', self.new_game),
             'q': Option('q', 'quit', quit),
             's': Option('s', 'settings', self.pages['settings'])
             'h': Option('h', 'help', self.pages['help']),
             'i': Option('i', 'about', self.pages['about']),
             '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'])
-        self.menu.push(self.pages['menu'])
-        self._game = None
-
-#        {'m': Page('Menu', '', options, order),
-#                       's': Page('Settings', '',
-#                                 {'r': Option('r', 'restore defaults', None),
-#                                  't': Option('t', 'amount of guessing ' \
-#                                              'letters', None),
-#                                  'l': Option('l', 'combination length', None),
-#                                  'a': Option('a', 'attempts allowed', None)},
-#                                 ['r', 't', 'l', 'a'])}
+        self._menu.push(self.pages['menu'])
+        self.__game = None
 
 if __name__ == '__main__':
     guesscii = Guesscii()
