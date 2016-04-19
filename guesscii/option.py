@@ -1,4 +1,5 @@
-from typing import *
+import typing
+test = typing.check
 
 class Option(object):
     """An option to display on the screen.
@@ -35,12 +36,12 @@ class Option(object):
         Create an Option object"""
 
         # Defensive programming
-        try:
-            for arg in (key, name):
-                check_type(arg, str, TypeError)
-            check_functionality(function, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.obj_type,
+                   'args': (arg, str, TypeError)}
+                  for arg in (key, name)]
+        checks.append({'function': typing.functionality,
+                       'args': (function, TypeError)})
+        test(checks)
 
         # Initialize attributes
         self._key = key

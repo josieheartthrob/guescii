@@ -1,83 +1,88 @@
-def check_type(obj, type_, e):
-    assert type(obj) == type_, e
+def check(checks):
+    try:
+        for d in checks:
+            d['function'](*d['args'])
+    except AssertionError as e:
+        raise e.args[0]
 
-def check_None(obj, e):
+def obj_type(obj, type_obj, e):
+    assert type(obj) == type_obj, e
+
+def if_None(obj, e):
     assert obj is not None, e
 
-def check_callable(obj, e):
+def obj_callable(obj, e):
     assert callable(obj), e
 
-def check_attribute(obj, attribute, e):
-    assert hasattr(obj, attribute), e
+def attribute(obj, attr, e):
+    assert hasattr(obj, attr), e
 
 
-def check_method(obj, attribute, e):
-    check_attribute(obj, attribute, e)
-    check_callable(getattr(obj, attribute), e)
+def method(obj, attr, e):
+    attribute(obj, attr, e)
+    obj_callable(getattr(obj, attr), e)
 
-def check_inside(iterator, container, e):
+def inside(iterator, container, e):
     for arg in (iterator, container):
         try:
-            check_method(arg, '__iter__', TypeError)
+            method(arg, '__iter__', TypeError)
         except TypeError:
-            check_method(arg, '__getitem__', TypeError)
+            method(arg, '__getitem__', TypeError)
     for item in iterator:
         assert item in container, e
 
-def check_functionality(function, e):
+def functionality(function, e):
     if function:
-        check_callable(function, e)
+        obj_callable(function, e)
 
+def settings(settings):
+    for attr in ('types', 'length', 'attempts'):
+        attribute(settings, attr, TypeError)
+        attr_type = type(getattr(settings, attr))
+        type(attr_type, int, AttributeError)
 
-def check_settings(settings):
-    for attribute in ('types', 'length', 'attempts'):
-        check_attribute(settings, attribute, TypeError)
-        attribute_type = type(getattr(settings, attribute))
-        check_type(attribute_type, int, AttributeError)
+def option(opt):
+    if type(opt) != str:
+        for attr in ('key', 'name'):
+            attribute(opt, attr, TypeError)
+            attr = getattr(opt, attr)
+            obj_type(attr, str, AttributeError)
+        obj_callable(opt, TypeError)
 
-def check_option(option):
-    if type(option) != str:
-        for attribute in ('key', 'name'):
-            check_attribute(option, attribute, TypeError)
-            attribute = getattr(option, attribute)
-            check_type(attribute, str, AttributeError)
-        check_callable(option, TypeError)
+def options(opts):
+    for attr in ('iteritems', 'keys'):
+        method(opts, attr, AttributeError)
+    for key, opt in opts.iteritems():
+        option(opt)
+        assert key == opt.key, KeyError
 
-def check_options(options):
-    for attribute in ('iteritems', 'keys'):
-        check_attribute(options, 'iteritems', TypeError)
-        check_callable(options.iteritems, AttributeError)
-    for key, option in options.iteritems():
-        check_option(option)
-        assert key == option.key, KeyError
+def order(order, opts):
+    method(order, '__getitem__', TypeError)
+    options(opts)
+    inside(order, opts.keys(), ValueError)
 
-def check_order(order, options):
-    check_method(order, '__getitem__', TypeError)
-    check_options(options)
-    check_inside(order, options.keys())
+def page(page):
+    for attr in ('options', 'order'):
+        attribute(page, attr, TypeError)
+    options(page.options)
+    order(page.order, page.options)
+    obj_callable(page, TypeError)
 
-def check_page(page):
-    for attribute in ('options', 'order'):
-        check_attribute(page, attribute, TypeError)
-    check_options(page.options)
-    check_order(page.order, page.options)
-    check_callable(page, TypeError)
-
-def check_combo(combo, settings):
-    check_type(combo, str, TypeError)
-    check_settings(settings)
+def combo(combo, settings):
+    type(combo, str, TypeError)
+    settings(settings)
     assert len(combo) == settings.length, ValueError
     letters = string.lowercase[:settings.types]
-    check_inside(answer, letters)
+    inside(answer, letters)
 
-def check_hint(hint, chars, length):
-    check_inside(set(hint), chars)
+def hint(hint, chars, length):
+    inside(set(hint), chars)
     assert len(hint) <= length, ValueError
 
-def check_hints(hints, chars, length):
+def hints(hints, chars, length):
     try:
-        check_method(hints, '__getitem__', TypeError)
+        method(hints, '__getitem__', TypeError)
     except TypeError:
-        check_method(hints, '__iter__', TypeError)
+        method(hints, '__iter__', TypeError)
     for hint in hints:
-        check_hint(hint, chars, length)
+        hint(hint, chars, length)

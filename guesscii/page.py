@@ -1,5 +1,5 @@
-import subprocess
-from typing import check_options, check_order, check_type
+import subprocess, time, typing
+check = typing.check
 
 def parse_input(data):
     # Defensive programming
@@ -41,10 +41,8 @@ class Page(object):
     @options.setter
     def options(self, other):
         # Defensive programming
-        try:
-            check_options(other)
-        except AssertionError as e:
-            raise e.args[0]
+        check(({'function': typing.options,
+                'args': (other,)},))
 
         # Main algorithm
         self._options = options
@@ -52,17 +50,19 @@ class Page(object):
     @order.setter
     def order(self, other):
         # Defensive programming
-        try:
-            check_order(other)
-        except AssertionError as e:
-            raise e.args[0]
+        check(({'function': typing.order,
+                'args':(other, self.options)},))
 
         # Main algorithm
         self._order = order
 
     @body.setter
     def body(self, other):
-        check_type(other, str, TypeError)
+        # Defensive programming
+        check(({'function': typing.obj_type,
+                'args': (other, str, TypeError)},))
+
+        # Main algorithm
         self._body = other
 
 
@@ -77,14 +77,16 @@ class Page(object):
         Create a page object."""
 
         # Defensive programming
-        try:
-            for arg in (header, body):
-                check_type(arg, str)
-            check_options(options)
-            check_order(order)
-            check_callable(parse, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.obj_type,
+                   'args': (arg, str, TypeError)}
+                  for arg in (header, body)]
+        checks.extend([{'function': typing.options,
+                      'args': (options,)},
+                     {'function': typing.order,
+                      'args': (order, options)},
+                     {'function': typing.functionality,
+                      'args': (parse, TypeError)}])
+        check(checks)
 
         # Initialize attributes
         self._header = header
@@ -94,16 +96,16 @@ class Page(object):
         self._parse = parse
 
     def __str__(self):
-        s = '[{}]\n\n{}\n'.format(self.header, self.body)
+        s = '[{}]\n\n{}\n\n'.format(self.header, self.body)
         for key in self._order:
-            s += self.options[key] + '\n'
+            s += self.options[key].__str__() + '\n'
         return s
 
-    def __call__(self,):
+    def __call__(self):
         key = ''
         while key not in self.options.keys():
             subprocess.call('cls', shell=True)
-            print page
+            print self
             try:
                 key, args, kwargs = self._parse(raw_input('> '))
             except (ValueError, TypeError):
