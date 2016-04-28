@@ -95,6 +95,11 @@ class Guesscii(object):
 
     # -----Public methods-----
 
+    def main(self):
+        """The main loop of the game."""
+        while True:
+            self._menu()
+
     def new_game(self):
         """Play the game with the current settings."""
         del self._game

@@ -80,12 +80,13 @@ class Page(object):
         checks = [{'function': typing.obj_type,
                    'args': (arg, str, TypeError)}
                   for arg in (header, body)]
-        checks.extend([{'function': typing.options,
-                      'args': (options,)},
-                     {'function': typing.order,
-                      'args': (order, options)},
-                     {'function': typing.functionality,
-                      'args': (parse, TypeError)}])
+        checks.extend([
+            {'function': typing.options,
+             'args': (options,)},
+            {'function': typing.order,
+             'args': (order, options)},
+            {'function': typing.functionality,
+             'args': (parse, TypeError)}])
         check(checks)
 
         # Initialize attributes
@@ -96,21 +97,59 @@ class Page(object):
         self._parse = parse
 
     def __str__(self):
-        s = '[{}]\n\n{}\n\n'.format(self.header, self.body)
+        s = '[{}]\n\n'.format(self.header)
+        if self._body:
+            s += self._body + '\n\n'
         for key in self._order:
             s += self.options[key].__str__() + '\n'
         return s
 
     def __call__(self):
         key = ''
-        while key not in self.options.keys():
-            subprocess.call('cls', shell=True)
-            print self
+        while True:
             try:
+                subprocess.call('cls', shell=True)
+                print self
                 key, args, kwargs = self._parse(raw_input('> '))
-            except (ValueError, TypeError):
-                raise TypeError
-        return self.options[key], args, kwargs
+                self.options[key](*args, **kwargs)
+                return
+            except KeyError:
+                continue
+
+def test():
+    from option import Option
+    def say(something):
+        check([{'function': typing.obj_type,
+                'args': (something, str, TypeError)}])
+
+        subprocess.call('cls', shell=True)
+        print something
+        time.sleep(1)
+
+    def parse(data):
+        check([{'function': typing.obj_type,
+               'args': (data, str, TypeError)}])
+
+        key, args, kwargs = data, (), {}
+        if data == 'h':
+            args = ('hi',)
+        elif data == 'b':
+            args = ('bye',)
+        else:
+            print 'invalid input'
+            raise ValueError
+        return key, args, kwargs
+
+    page = Page('test page', 'some\narbitrary\nwords',
+        {'h': Option('h', 'say hi', say),
+         'b': Option('b', 'say bye', say)},
+        ['h', 'b'], parse)
+
+    for i in xrange(3):
+        page()
+
+if __name__ == '__main__':
+    test()
 
 # option, args, kwargs = menu page, (), {}
 # while True

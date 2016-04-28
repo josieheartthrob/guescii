@@ -1,6 +1,4 @@
-import subprocess
-from page import Page
-from typing import check_page
+import subprocess, typing, time
 
 class Menu(object):
     """An interface class that displays information to the user and ac-
@@ -17,24 +15,23 @@ class Menu(object):
 
     #-----Public methods-----
 
-    @property
     def push(self, page):
         """Assumes page is a page object
         push the specified page to the stack."""
 
         # Defensive programming
         try:
-            check_page(page)
+            typing.page(page)
         except AssertionError as e:
             raise e.args[0]
 
-        self._page_stack.append(page)
+        self.__page_stack.append(page)
+        return self()
 
-    @property
     def back(self):
         """Display the previous page."""
 
-        self._page_stack = self._page_stack[:-1]
+        self.__page_stack = self._page_stack[:-1]
         return self()
 
 
@@ -43,16 +40,36 @@ class Menu(object):
     def __init__(self):
         """Create a Menu object."""
 
-        # Defensive programming
-        try:
-            check_page(home)
-            for option in home.options.itervalues():
-                assert option != self.back, ValueError
-        except AssertionError as e:
-            raise e.args[0]
-
         # Main algorithm
         self.__page_stack = []
 
     def __call__(self):
         self._page_stack[-1]()
+
+def test():
+    from page import Page
+    from option import Option
+
+    m = Menu()
+
+    page_2 = Page('test page 2', '', {
+        'b': Option('b', 'back', m.back)}, ['b'])
+
+    def parse_1(data):
+        args, kwargs = [], {}
+        if data == 'n':
+            args = [page_2]
+        elif data != 'q':
+            raise ValueError
+        return data, args, kwargs
+
+    page_1 = Page('test page', '', {
+            'n': Option('n', 'next page', m.push),
+            'q': Option('q', 'quit', quit)},
+        ['n', 'b'], parse_1)
+    print page_1.options.keys()
+
+    m.push(page_1)
+
+if __name__ == '__main__':
+    test()
