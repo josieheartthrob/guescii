@@ -197,7 +197,7 @@ class Guesscii(object):
             'l': Option('l', 'length', self._pages['length']),
             'a': Option('a', 'attempts', self._pages['attempts']),
             'b': Option('b', 'back', self.menu.back),
-            's': Options('s', 'change all settings', self._parse_settings)
+            's': Options('s', 'change all settings', self._parse_settings),
             '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
             self._parse_settings)
         self._pages['menu'] = Page('Menu', '', {

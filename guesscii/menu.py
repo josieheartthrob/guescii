@@ -8,9 +8,9 @@ class Menu(object):
 
     # Mutable
     @property
-    def _page_stack(self):
+    def _pages(self):
         """The stack of pages."""
-        return self.__page_stack[:]
+        return self.__pages[:]
 
 
     #-----Public methods-----
@@ -25,14 +25,12 @@ class Menu(object):
         except AssertionError as e:
             raise e.args[0]
 
-        self.__page_stack.append(page)
-        return self()
+        self.__pages.append(page)
 
     def back(self):
         """Display the previous page."""
 
-        self.__page_stack = self._page_stack[:-1]
-        return self()
+        self.__pages = self._pages[:-1]
 
 
     # -----Magic methods-----
@@ -41,10 +39,10 @@ class Menu(object):
         """Create a Menu object."""
 
         # Main algorithm
-        self.__page_stack = []
+        self.__pages = []
 
     def __call__(self):
-        self._page_stack[-1]()
+        self._pages[-1]()
 
 def test():
     from page import Page
@@ -66,10 +64,12 @@ def test():
     page_1 = Page('test page', '', {
             'n': Option('n', 'next page', m.push),
             'q': Option('q', 'quit', quit)},
-        ['n', 'b'], parse_1)
+        ['n', 'q'], parse_1)
     print page_1.options.keys()
 
     m.push(page_1)
+    while True:
+        m()
 
 if __name__ == '__main__':
     test()

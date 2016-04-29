@@ -87,6 +87,7 @@ class Page(object):
              'args': (order, options)},
             {'function': typing.functionality,
              'args': (parse, TypeError)}])
+        print order, '\n', options
         check(checks)
 
         # Initialize attributes
