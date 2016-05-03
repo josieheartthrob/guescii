@@ -108,13 +108,6 @@ class Guesscii(object):
 
     def continue_game(self):
         """Continue the current game."""
-        # Defensive programming
-        try:
-            check_None(self.game, AttributeError)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
         option = self._game.main()
 
 
@@ -124,12 +117,6 @@ class Guesscii(object):
         self._settings = self._defaults
 
     def parse_menu(self, data):
-        # Defensive programming
-        try:
-            check_type(data, str, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
-
         if data == 'n':
             return data, (self._settings), {}
         elif data in self._pages['settings'].order:
@@ -138,25 +125,12 @@ class Guesscii(object):
             raise ValueError
 
     def _parse_settings(self, data):
-        # Defensive programming
-        try:
-            check_type(data, str, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
         if data in self._pages['settings'].order:
             return data, (), {}
         else:
             return 's', (data), {}
 
     def _data_to_settings(self, data):
-        # Defensive programming
-        try:
-            check_type(data, str, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
-
         # Helper variables
         maximums = {'t': 30, 'l': 20, 'a': 100}
         pattern = re.compile(r'[tla]\W*\d+')
@@ -168,7 +142,6 @@ class Guesscii(object):
             settings[key] = int(re.findall(r'\d+', setting))
             if settings[key] > maximums[key]:
                 raise ValueError
-        check_inside(settings.keys(), 'tla', ValueError)
         settings = Settings(types=settings['t'],
             length=settings['l'], attempts=settings['a'])
         return settings

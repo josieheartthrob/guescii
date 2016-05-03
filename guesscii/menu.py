@@ -1,4 +1,4 @@
-import subprocess, typing, time
+import subprocess, time
 
 # Modified Docstrings to fit standards
 class Menu(object):
@@ -15,14 +15,6 @@ class Menu(object):
 
     @_pages.setter
     def _pages(self, pages):
-        # Defensive programming
-        try:
-            typing.method(pages, '__getitem__', TypeError)
-            for page in pages:
-                typing.page(page)
-        except AssertionError as e:
-            raise e.args[0]
-
         self.__pages = pages
 
 
@@ -36,17 +28,7 @@ class Menu(object):
 
         Side Effects:
             Modifies the private pages property.
-
-        Raises:
-            An exception if the page is invalid."""
-
-        # Defensive programming
-        try:
-            typing.page(page)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
+        """
         pages = self._pages
         pages.append(page)
         self._pages = pages
@@ -55,7 +37,8 @@ class Menu(object):
         """Go to the previous page.
 
         Side Effects:
-            Modify the private pages property"""
+            Modify the private pages property.
+        """
         pages = self._pages[:-1]
         self._pages = pages
 

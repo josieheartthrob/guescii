@@ -1,6 +1,3 @@
-import subprocess, time, typing
-check = typing.check
-
 class Page(object):
 
     #-----Public properties-----
@@ -31,29 +28,14 @@ class Page(object):
 
     @options.setter
     def options(self, other):
-        # Defensive programming
-        check([{'function': typing.options,
-                'args': (other,)}])
-
-        # Main algorithm
         self._options = options
 
     @order.setter
     def order(self, other):
-        # Defensive programming
-        check([{'function': typing.order,
-                'args':(other, self.options)}])
-
-        # Main algorithm
         self._order = order
 
     @body.setter
     def body(self, other):
-        # Defensive programming
-        check([{'function': typing.obj_type,
-                'args': (other, str, TypeError)}])
-
-        # Main algorithm
         self._body = other
 
 
@@ -67,20 +49,6 @@ class Page(object):
 
         Create a page object."""
 
-        # Defensive programming
-        checks = [{'function': typing.obj_type,
-                   'args': (arg, str, TypeError)}
-                  for arg in (header, body)]
-        checks.extend([
-            {'function': typing.options,
-             'args': [options]},
-            {'function': typing.order,
-             'args': (order, options)},
-            {'function': typing.functionality,
-             'args': (parse, TypeError)}])
-        check(checks)
-
-        # Initialize attributes
         self._header = header
         self._body = body
         self._options = options
@@ -110,17 +78,11 @@ class Page(object):
 def test():
     from option import Option
     def say(something):
-        check([{'function': typing.obj_type,
-                'args': (something, str, TypeError)}])
-
         subprocess.call('cls', shell=True)
         print something
         time.sleep(1)
 
     def parse(data):
-        check([{'function': typing.obj_type,
-               'args': (data, str, TypeError)}])
-
         key, args, kwargs = data, (), {}
         if data == 'h':
             args = ('hi',)

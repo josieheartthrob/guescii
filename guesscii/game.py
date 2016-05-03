@@ -1,6 +1,5 @@
 import string, subprocess, random
 from gamedata import Data, EXACT, SIMILAR
-from typing import *
 
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
@@ -63,11 +62,6 @@ class Game(object):
             elif guess in self._page.order:
                 yield self._page.options[guess]
 
-            try:
-                check_combo(guess, self._settings)
-            except AssertionError as e:
-                raise e.args[0]
-
             self._data.add_guess(guess)
 
             hint = self._build_hint(guess)
@@ -91,12 +85,6 @@ class Game(object):
         Arguments:
             guess ----- a string entered by the user
         """
-        # Polymorphic defensive programming
-        try:
-            check_type(guess, str, TypeError)
-            check_inside(guess, self._types, ValueError)
-        except AssertionError as excpetion:
-            raise exception.args[0]
 
         # Here's a funny thing: In Tatham's source code they reference a
         # wolfram alpha page that has the formula for this. But I actually
@@ -120,13 +108,6 @@ class Game(object):
                 data ----- a string entered by the user
             """
 
-            # Defensive programming
-            try:
-                check_type(data, str, TypeError)
-            except AssertionError as e:
-                raise e.args[0]
-
-            # Main algorithm
             if data in self._page.order:
                 return data, (), {}
             else:
@@ -135,15 +116,9 @@ class Game(object):
         def _data_to_guess(self, data):
             """Assumes data is  a string.
             Create a new combo string based off data.
-            Raise an exception if it can't be translated."""
-
-            # Integrated defensive programming and main algorithm
-            guess = re.sub(' ', '', data)
-            try:
-                check_combo(data, self._settings)
-                return guess
-            except AssertionError as e:
-                raise e.args[0]
+            Raise an exception if it can't be translated.
+            """
+            return re.sub(' ', '', data)
 
 
     #-----Magic methods-----
@@ -153,15 +128,6 @@ class Game(object):
         Options is a dictionary of options;
         Order is sequence of characters that represents the option order."""
 
-        # Polymorphic defensive programming
-        try:
-            check_settings(settings)
-            check_options(options)
-            check_order(order, options)
-        except AssertionError as exeption:
-            raise exception.args[0]
-
-        # Initialize attributes
         self.__settings = settings
         self.__types = string.lowercase[:settings.types]
         self.__data = Data(settings)
