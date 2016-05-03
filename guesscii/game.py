@@ -5,20 +5,21 @@ from typing import *
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
 
+# Modified the Docstrings to fit standards
 class Game(object):
-    """The main class that runs the actual game."""
+    """The main class that runs an actual game."""
 
         #-----Private properties-----
 
         # Immutable
         @property
         def _settings(self):
-            """The settings object."""
+            """The settings used to create the game."""
             return self.__settings
 
         @property
         def _types(self):
-            """A string of all the differenct characters the combination chooses from."""
+            """The string of different letters that make each combination."""
             return self.__types
 
         @property
@@ -26,12 +27,33 @@ class Game(object):
             """The answer combination."""
             return self.__answer
 
+        # Mutable
+        @property
+        def _data(self):
+            """The data used to display to the user."""
+
+        @property
+        def _page(self):
+            """The page object that displays the game."""
+
 
     #-----Public methods-----
 
     def main(self):
-        """Run the actual game.
-        Yield an option object."""
+        """Run an actual game.
+        Yield an option object.
+
+        Yields:
+            An option object that's either chosen by the user entering menu commands or because the game ended. The option is essential for the game's main loop to run as intended.
+
+        Side Effects:
+            Meant to modify the hints, guesses and answer properties of
+                the data property.
+            Meant modify the body property of the page property.
+
+        Raises:
+            An exception if the guess entered by the user is invalid.
+        """
         for i in xrange(self._settings.attempts):
             guess = self._page()
 
@@ -57,16 +79,18 @@ class Game(object):
     #-----Private methods-----
 
     def _build_answer(self):
-        """Create a  randomized string of lower-case  letters based off
-        the settings."""
+        """Create a randomized answer combination."""
         answer = ''
         for i in xrange(self._settings.length):
             answer += random.choice(self._types)
         return answer
 
     def _build_hint(self, guess):
-        """Assumes guess is a combo string;
-        Return a string that gives the user info about their guess."""
+        """Return a string that gives the user info about their guess.
+
+        Arguments:
+            guess ----- a string entered by the user
+        """
         # Polymorphic defensive programming
         try:
             check_type(guess, str, TypeError)
@@ -74,10 +98,10 @@ class Game(object):
         except AssertionError as excpetion:
             raise exception.args[0]
 
-        # Here's a funny thing: In Tatham's source code they reference a wolfr-
-        # am alpha page that  has the formula for this. But I actually  figured
-        # this out before  I even knew Tatham's code was  open-source - because
-        # I'm a fucking math-genius.
+        # Here's a funny thing: In Tatham's source code they reference a
+        # wolfram alpha page that has the formula for this. But I actually
+        # figured this out before I even knew Tatham's code was open-source -
+        # because I'm a fucking math-genius.
 
         # Helper variables
         guess_map = {c: guess.count(c) for c in set(guess)}
@@ -90,8 +114,11 @@ class Game(object):
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
         def _parse_user_input(self, data):
-            """Assumes data is a string.
-            Parse data to call an option or evaluate a guess."""
+            """Parse data to call an option or evaluate a guess.
+
+            Arguments:
+                data ----- a string entered by the user
+            """
 
             # Defensive programming
             try:

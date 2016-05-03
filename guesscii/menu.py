@@ -1,23 +1,44 @@
 import subprocess, typing, time
 
+# Modified Docstrings to fit standards
 class Menu(object):
-    """An interface class that displays information to the user and ac-
-    cesses data from its parent Guesscii instance."""
+    """Display information to the user and access game data."""
 
     #-----Private properties-----
 
+    # Made the pages property modifiable and implemented it throughout the code
     # Mutable
     @property
     def _pages(self):
         """The stack of pages."""
         return self.__pages[:]
 
+    @_pages.setter
+    def _pages(self, pages):
+        # Defensive programming
+        try:
+            typing.method(pages, '__getitem__', TypeError)
+            for page in pages:
+                typing.page(page)
+        except AssertionError as e:
+            raise e.args[0]
+
+        self.__pages = pages
+
 
     #-----Public methods-----
 
     def push(self, page):
-        """Assumes page is a page object
-        push the specified page to the stack."""
+        """Push the specified page to the stack.
+
+        Arguments:
+            page ----- page object
+
+        Side Effects:
+            Modifies the private pages property.
+
+        Raises:
+            An exception if the page is invalid."""
 
         # Defensive programming
         try:
@@ -25,33 +46,40 @@ class Menu(object):
         except AssertionError as e:
             raise e.args[0]
 
-        self.__pages.append(page)
+        # Main algorithm
+        pages = self._pages
+        pages.append(page)
+        self._pages = pages
 
     def back(self):
-        """Display the previous page."""
+        """Go to the previous page.
 
-        self.__pages = self._pages[:-1]
+        Side Effects:
+            Modify the private pages property"""
+        pages = self._pages[:-1]
+        self._pages = pages
 
 
-    # -----Magic methods-----
+    #-----Magic methods-----
 
     def __init__(self):
         """Create a Menu object."""
-
-        # Main algorithm
         self.__pages = []
 
     def __call__(self):
+        """Call the page at the top of the stack."""
         self._pages[-1]()
+
+
+# Added a seperator comment
+#------------------Testing------------------
 
 def test():
     from page import Page
     from option import Option
 
-    m = Menu()
-
-    page_2 = Page('test page 2', '', {
-        'b': Option('b', 'back', m.back)}, ['b'])
+    # changed the name of the m variable to menu
+    menu = Menu()
 
     def parse_1(data):
         args, kwargs = [], {}
@@ -62,14 +90,16 @@ def test():
         return data, args, kwargs
 
     page_1 = Page('test page', '', {
-            'n': Option('n', 'next page', m.push),
+            'n': Option('n', 'next page', menu.push),
             'q': Option('q', 'quit', quit)},
         ['n', 'q'], parse_1)
-    print page_1.options.keys()
 
-    m.push(page_1)
+    page_2 = Page('test page 2', '', {
+        'b': Option('b', 'back', menu.back)}, ['b'])
+
+    menu.push(page_1)
     while True:
-        m()
+        menu()
 
 if __name__ == '__main__':
     test()

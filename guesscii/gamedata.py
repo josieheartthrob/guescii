@@ -1,5 +1,5 @@
-import string, re
-from typing import *
+import string, re, typing
+check = typing.check
 
 # Global variables
 EXACT = 'x'
@@ -47,10 +47,8 @@ class Data(object):
     @answer.setter
     def answer(self, answer):
         # Defensive programming
-        try:
-            check_combo(answer, self._settings)
-        except AssertionError as e:
-            raise e.args[0]
+        check([{'function': typing.combo,
+                'args': (answer, self._settings)}])
 
         # Main algorithm
         self._answer = answer.replace('', ' ')[1:-1]
@@ -61,12 +59,13 @@ class Data(object):
     @_guesses.setter
     def _guesses(self, guesses):
         # Polymorphic defensive programming
-        try:
-            check_method(guesses, '__getitem__', TypeError)
-            for guess in guesses:
-                check_combo(guess, self._settings)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.method,
+                   'args': (guesses, '__getitem__,', TypeError)}]
+        guess_checks = [{'function': typing.combo,
+                         'args': (guess, self._settings)} for
+                        guess in guesses]
+        checks.extend(guess_checks)
+        check(checks)
 
         # Main algorithm
         self.__guesses = guesses
@@ -74,10 +73,8 @@ class Data(object):
     @_hints.setter
     def _hints(self, hints):
         # Polymorphic defensive programming
-        try:
-            check_hints(hints, (EXACT, SIMILAR), self._settings.length)
-        except AssertionError as e:
-            raise e.args[0]
+        check([{'function': typing.hints,
+                'args': (hints, (EXACT, SIMILAR), self._settings.length)}])
 
         # Main algorithm
         self.__hints = hints
@@ -89,31 +86,37 @@ class Data(object):
     #-----Public methods-----
 
     def add_guess(self, guess):
-        """Assumes guess is a combo string
-        Modify the private guesses property of the reprentation"""
+        """Add a guess to the list of guesses.
 
+        Arguments:
+            guess ----- string; combination
+
+        Side Effects:
+            Modifies the private guesses property by replacing the next
+            placeholder with the specified guess.
+        """
         # Defensive programming
-        try:
-            check_combo(guess, self._settings)
-        except AssertionError as e:
-            raise e.args[0]
+        check([{'funcion': typing.combo,
+                'args': (guess, self._settings)}])
 
         # Main algorithm
         self._add_item('_guesses', guess, lambda s: s.find("_") >= 0)
 
     def add_hint(self, hint):
-        """Assumes hint is a string
+        """Add a hint to the list of hints.
 
-        hint is less than or equal to the combination length and is on-
-        ly composed of the EXACT and SIMILAR global variables
+        Arguments:
+            hint ----- a string less than or equal to the combination length.
+                         It's only composed of the EXACT and SIMILAR global
+                         variables.
 
-        Replace the next placeholder with an actual game hint."""
-
+        Side Effects:
+            Modifies the private hints property by replacing the next
+            placeholder with the specified hint.
+        """
         # Defensive programming
-        try:
-            check_hint(hint, (EXACT, SIMILAR), self._settings.length)
-        except AssertionError as e:
-            raise e.args[0]
+        check([{'function': typing.hint,
+                'args': (hint, (EXACT, SIMILAR), self._settings.length)}])
 
         # Main algorithm
         self._add_item('_hints', hint, lambda s: len(s) == 0)
@@ -122,8 +125,8 @@ class Data(object):
     #-----Private methods-----
 
     def _build_placeholders(self):
-        """Create a placeholders dictionary based off of the
-        gamedata settings."""
+        """Create a dictionary of guess and hint placeholders."""
+        # This method makes use of the string-formatting mini-language
 
         # Helper variables
         types = self._settings.types
@@ -135,34 +138,38 @@ class Data(object):
         full = base + space + 1
 
         # Main algorithm
-        placeholders = {'header': self._buffer_string(('types: ^{}',), space)}
 
-        guesses = [self._buffer_string(('guess: >{}', 'seperator: ^{}',
-                                         'hint'), space) for
+        # Aligns the amount of specified spaces on either side
+        header = self._buffer_string(['types: ^{}'], space)
+        placeholders = {'header': header}
+
+        guess_strings = ('guess: >{}', 'seperator: ^{}', 'hint')
+        guesses = [self._buffer_string(guess_strings, space) for
                    attempt in xrange(self._settings.attempts)]
         placeholders['guesses'] = guesses
 
         placeholders['seperator'] = "_"*full + '\n\n'
-        placeholders['answer'] = self._buffer_string(("answer: >{}",), space)
+
+        answer = 'answer: >{}'
+        placeholders['answer'] = self._buffer_string([answer], space)
 
         return placeholders
 
-    def _buffer_string(self, strings, space):
+    def _build_placeholder(self, strings, space):
         """Assumes string is a string;
         length is a positive integer;
 
         string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
 
-        Return a copy of the given string with a buffer on both ends."""
-
+        Return a copy of the given string with a buffer on both ends.
+        """
         # Defensive programming
-        try:
-            check_method(string, '__iter__', TypeError)
-            for s in strings:
-                check_type(s, str, TypeError)
-            check_type(space, int, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.method,
+                   'args': (string, '__iter__', TypeError)}]
+        type_checks = [{'function': typing.obj_type,
+                        'args': (s, str, TypeError)} for s in strings]
+        checks.extend(type_checks)
+        check(checks)
 
         # Main algorithm
         s = ''
@@ -186,14 +193,16 @@ class Data(object):
         first occurs."""
 
         # Polymorphic defensive programming
-        try:
-            for attribute in ('__iter__', '__getitem__'):
-                check_method(strings, attribute, TypeError)
-            for string in strings:
-                check_type(string, str, TypeError)
-            check_callable(is_placeholder, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.method,
+                  'args': (strings, attribute, TypeError)} for
+                 attribute in ('__iter__', '__getitem__')]
+        type_checks = [{'function': typing.obj_type,
+                        'args': (s, str, TypeError)} for s in strings}]
+        checks.extend(type_checks)
+        callable_check = {'function': typing.callable,
+                          'args': (is_placeholder, TypeError)}
+        checks.append(callable_check)
+        check(checks)
 
         # Main algorithm
         for i, s in enumerate(strings):
@@ -209,14 +218,19 @@ class Data(object):
         add an item to the specified attribute."""
 
         # Defensive programming
-        try:
-            check_type(attribute, str, TypeError)
-            check_attribute(self, attribute, AttributeError)
-            for method in ('__getitem__', '__setitem__'):
-                check_method(getattr(self, attribute), method, TypeError)
-            check_callable(function, TypeError)
-        except AssertionError as e:
-            raise e.args[0]
+        checks = [{'function': typing.obj_type,
+                   'args': (attribute, str, TypeError)},
+                  {'function': typing.attribute,
+                   'args': (self, attribute, AttributeError)}]
+        method_checks = [{'function': typing.method,
+                          'args': (getattr(self, attribute),
+                                   method, TypeError)
+                         } for method in ('__getitem__', '__setitem__')]
+        checks.extend(method_checks)
+        callable_check = {'function': typing.callable,
+                          'args': (fucntion, TypeError)}
+        checks.append(callable_check)
+        check(checks)
 
         # Main algorithm
         replica = getattr(self, attribute)
@@ -231,12 +245,8 @@ class Data(object):
         """Assumes settings is a settings dictionary.
 
         Create a GameRep with the given arguments."""
-
-        # Polymorphic defensive programming
-        try:
-            check_settings(settings)
-        except AssertionError as e:
-            raise e.args[0]
+        # Defensive programming
+        check([{'function': typing.settings, 'args': [settings]}])
 
         # Helper variables
         placeholder = (" _"*settings.length)[1:]

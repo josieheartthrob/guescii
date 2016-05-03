@@ -1,15 +1,6 @@
 import subprocess, time, typing
 check = typing.check
 
-def parse_input(data):
-    # Defensive programming
-    try:
-        check_type(data, str, TypeError)
-    except AssertionError as e:
-        raise e.args[0]
-
-
-
 class Page(object):
 
     #-----Public properties-----
@@ -41,8 +32,8 @@ class Page(object):
     @options.setter
     def options(self, other):
         # Defensive programming
-        check(({'function': typing.options,
-                'args': (other,)},))
+        check([{'function': typing.options,
+                'args': (other,)}])
 
         # Main algorithm
         self._options = options
@@ -50,8 +41,8 @@ class Page(object):
     @order.setter
     def order(self, other):
         # Defensive programming
-        check(({'function': typing.order,
-                'args':(other, self.options)},))
+        check([{'function': typing.order,
+                'args':(other, self.options)}])
 
         # Main algorithm
         self._order = order
@@ -59,8 +50,8 @@ class Page(object):
     @body.setter
     def body(self, other):
         # Defensive programming
-        check(({'function': typing.obj_type,
-                'args': (other, str, TypeError)},))
+        check([{'function': typing.obj_type,
+                'args': (other, str, TypeError)}])
 
         # Main algorithm
         self._body = other
@@ -82,12 +73,11 @@ class Page(object):
                   for arg in (header, body)]
         checks.extend([
             {'function': typing.options,
-             'args': (options,)},
+             'args': [options]},
             {'function': typing.order,
              'args': (order, options)},
             {'function': typing.functionality,
              'args': (parse, TypeError)}])
-        print order, '\n', options
         check(checks)
 
         # Initialize attributes

@@ -5,31 +5,33 @@ class Settings(object):
 
     #-----Public properties-----
 
+    # Modified the Docstrings to fit standards
     @property
     def types(self):
-        """An integer that represents the amount of letters in the pool
-        of letters the game chooses from when creating a random combin-
-        ation."""
+        """The integer amount of different letters to create a combination."""
         return string.lowercase[:self._types]
 
     @property
     def length(self):
-        """An integer that represents the length of the answer combina-
-        tion as well as each guess."""
+        """The integer length of each combination."""
         return self._length
 
     @property
     def attempts(self):
-        """An integer  that represents the amount of  attempts the user
-        is given to guess the answer combination."""
+        """The integer amount of guesses allowed."""
         return self._attempts
 
 
     #-----Magic methods-----
 
     def __init__(self, types=6, length=4, attempts=10):
-        """Assumes  types, length, and attempts are  all integers grea-
-        ter than 1."""
+        """Create a Settings Object.
+
+        Keyword Arguments:
+            types, length, and attempts are  all integers greater than 1.
+
+        Raises:
+            an exception if any of the passed arguments aren't positive integers"""
 
         # Polymorphic defensive programming
         try:
