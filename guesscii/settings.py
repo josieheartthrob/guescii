@@ -1,8 +1,20 @@
 import string
 
 class Settings(object):
-    """An object that contains the data needed to create a game."""
+    """An object that contains the data needed to create a game.
 
+    Public Properties
+        types ------- A positive integer greater than 1 that determines
+                        the amount of letters to choose from when
+                        creating a combination.
+
+        length ------ A positive integer greater than 1 as the length of
+                        each combination.
+
+        attmepts ---- A positive integer greater than 1 as the amount of
+                        times the user is allowed to guess the combination
+                        before the game is lost.
+    """
     #-----Public properties-----
 
     # Modified the Docstrings to fit standards
@@ -28,21 +40,31 @@ class Settings(object):
         """Create a Settings Object.
 
         Keyword Arguments:
-            types, length, and attempts are  all integers greater than 1.
+            types, length, and attempts are all integers greater than 1.
 
         Raises:
-            an exception if any of the passed arguments aren't positive integers"""
-
+            A TypeError if any of the arguments passed aren't integers.
+            A ValueError if any of the arguments passed aren't
+              greater than one.
+        """
         # Polymorphic defensive programming
         try:
-            for arg in (types, length, attempts):
-                assert type(arg) == int
-                assert arg > 1, ValueError
-
-        except (AssertionError, TypeError) as e:
+            for arg in ('types', 'length', 'attempts'):
+                assert type(eval(arg)) is int, TypeError(
+                    arg+' must be an int.')
+                assert arg > 1, ValueError(arg+' must be greater than 1.')
+        except AssertionError as e:
             raise e.args[0]
 
         # Attribute initializations
         self._types = types
         self._length = length
         self._attempts = attempts
+
+def test():
+    settings = Settings(6, 4, 6)
+    for attribute in ('types', 'length', 'attempts'):
+        print '{}: {}'.format(attribute, getattr(settings, attribute))
+
+if __name__ == '__main__':
+    test()
