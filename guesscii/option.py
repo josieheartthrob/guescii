@@ -70,7 +70,7 @@ def test():
     key = ''
     while key != 'h':
         call('cls', shell=True)
-        print otpion
+        print option
         key = raw_input('\n> ')
     option('Hello, world.')
 

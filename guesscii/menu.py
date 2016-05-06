@@ -1,27 +1,37 @@
 import subprocess, time
 
-# Modified Docstrings to fit standards
 class Menu(object):
-    """Display information to the user and access game data."""
+    """Display information to the user and access game data.
+
+    Public methods:
+        push ----- Go to another page
+        back ----- Go to the previous page
+
+    The push and back methods are intended to be used right before
+        calling the menu again.
+    """
 
     #-----Private properties-----
 
-    # Made the pages property modifiable and implemented it throughout the code
-    # Mutable
     @property
     def _pages(self):
-        """The stack of pages."""
         return self.__pages[:]
 
+    # Re-wrote some defensive programming
     @_pages.setter
     def _pages(self, pages):
+        try:
+            for page in pages:
+                assert callable(page), page
+        except AssertionError as e:
+            raise TypeError(type(e.args[0]) + ' must be callable.')
         self.__pages = pages
 
 
     #-----Public methods-----
 
     def push(self, page):
-        """Push the specified page to the stack.
+        """Push the specified page to the page stack.
 
         Arguments:
             page ----- page object
@@ -34,7 +44,7 @@ class Menu(object):
         self._pages = pages
 
     def back(self):
-        """Go to the previous page.
+        """Remove the last page from the page stack.
 
         Side Effects:
             Modify the private pages property.
@@ -50,18 +60,15 @@ class Menu(object):
         self.__pages = []
 
     def __call__(self):
-        """Call the page at the top of the stack."""
         self._pages[-1]()
 
 
-# Added a seperator comment
 #------------------Testing------------------
 
 def test():
     from page import Page
     from option import Option
 
-    # changed the name of the m variable to menu
     menu = Menu()
 
     def parse_1(data):

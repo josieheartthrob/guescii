@@ -1,26 +1,23 @@
+import subprocess
+
 class Page(object):
 
     #-----Public properties-----
 
     @property
     def options(self):
-        """A dictionary where  each value is an option and each  key is
-        the option's key"""
         return self._options.copy()
 
     @property
     def order(self):
-        """The order the options are displayed."""
         return self._order[:]
 
     @property
     def header(self):
-        """The header of the page."""
         return self._header
 
     @property
     def body(self):
-        """The body of the page."""
         return self._body
 
 
@@ -43,12 +40,25 @@ class Page(object):
 
     def __init__(self, header, body, options, order,
                  parse=lambda x: (x, (), {})):
-        """Assumes header and body are strings;
-        options is a dictionary of options;
-        order is the ordre to display the options;
+        """Create a page object.
 
-        Create a page object."""
+        Arguments:
+            header ----- A string that let's the user know what the
+                            page is about.
+            body ------- A string that gives the user any information.
+            options ---- a dictionary of option objects where each key is
+                            the relative item's (option object's) key
+            order ------ An ordered container object as the order in which
+                            to display the options to the page
 
+        Keyword Arguments:
+            parse ------ A callable object that parses the data entered by
+                            the user when the page is called.
+
+                            It should return an a key to access one of the
+                            page's options, and arguments and keyword
+                            arguments to call the option with.
+        """
         self._header = header
         self._body = body
         self._options = options
@@ -76,6 +86,7 @@ class Page(object):
                 continue
 
 def test():
+    import time
     from option import Option
     def say(something):
         subprocess.call('cls', shell=True)
