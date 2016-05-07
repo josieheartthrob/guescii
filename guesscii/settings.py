@@ -51,8 +51,9 @@ class Settings(object):
         try:
             for arg in ('types', 'length', 'attempts'):
                 assert type(eval(arg)) is int, TypeError(
-                    arg+' must be an int.')
-                assert arg > 1, ValueError(arg+' must be greater than 1.')
+                    '{} must be an int.'.format(arg))
+                assert arg > 1, ValueError(
+                    '{} must be greater than 1.'.format(arg))
         except AssertionError as e:
             raise e.args[0]
 

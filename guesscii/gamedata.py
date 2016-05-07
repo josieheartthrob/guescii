@@ -12,54 +12,7 @@ class Data(object):
     # Mutable
     @property
     def answer(self):
-        """A placeholder for the answer."""
         return self._answer
-
-
-    #-----Private properties-----
-
-    # Immutable
-    @property
-    def _settings(self):
-        """The game's settings."""
-        return self.__settings
-
-    @property
-    def _placeholders(self):
-        """A list of placeholder strings."""
-        return self.__placeholders.copy()
-
-    # Mutable
-    @property
-    def _guesses(self):
-        """A list of guesses the user has made."""
-        return self.__guesses[:]
-
-    @property
-    def _hints(self):
-        """A list of hints displayed to the user."""
-        return self.__hints[:]
-
-
-    #-----Public property prescriptors-----
-
-    @answer.setter
-    def answer(self, answer):
-        self._answer = answer.replace('', ' ')[1:-1]
-
-
-    #-----Private property prescriptors-----
-
-    @_guesses.setter
-    def _guesses(self, guesses):
-        self.__guesses = guesses
-
-    @_hints.setter
-    def _hints(self, hints):
-        self.__hints = hints
-
-    #--------------------------------------------------------------------------
-
 
 
     #-----Public methods-----
@@ -91,6 +44,52 @@ class Data(object):
         self._add_item('_hints', hint, lambda s: len(s) == 0)
 
 
+    #-----Constructor method-----
+
+    def __init__(self, settings):
+        """Assumes settings is a settings dictionary.
+
+        Create a GameRep with the given arguments."""
+        # Helper variables
+        placeholder = (" _"*settings.length)[1:]
+
+        # Initialize attributes
+        self.__settings = settings
+        self.__placeholders = self._build_placeholders()
+        self.__guesses = [placeholder for attempt in
+                          xrange(settings.attempts)]
+        self.__hints = ['' for attempt in xrange(settings.attempts)]
+        self._answer = placeholder
+
+
+#-----------------------------------------------------------------------------
+
+
+    #-----Private properties-----
+
+    # Immutable
+    @property
+    def _settings(self):
+        """The game's settings."""
+        return self.__settings
+
+    @property
+    def _placeholders(self):
+        """A list of placeholder strings."""
+        return self.__placeholders.copy()
+
+    # Mutable
+    @property
+    def _guesses(self):
+        """A list of guesses the user has made."""
+        return self.__guesses[:]
+
+    @property
+    def _hints(self):
+        """A list of hints displayed to the user."""
+        return self.__hints[:]
+
+
     #-----Private methods-----
 
     def _build_placeholders(self):
@@ -98,7 +97,7 @@ class Data(object):
         # This method makes use of the string-formatting mini-language
 
         # Helper variables
-        types = self._settings.types
+        types = len(self._settings.types)
         length = self._settings.length
 
         # Derived Helper variables
@@ -109,18 +108,18 @@ class Data(object):
         # Main algorithm
 
         # Aligns the amount of specified spaces on either side
-        header = self._buffer_string(['types: ^{}'], space)
+        header = self._build_placeholder(['types: ^{}'], space)
         placeholders = {'header': header}
 
         guess_strings = ('guess: >{}', 'seperator: ^{}', 'hint')
-        guesses = [self._buffer_string(guess_strings, space) for
+        guesses = [self._build_placeholder(guess_strings, space) for
                    attempt in xrange(self._settings.attempts)]
         placeholders['guesses'] = guesses
 
         placeholders['seperator'] = "_"*full + '\n\n'
 
         answer = 'answer: >{}'
-        placeholders['answer'] = self._buffer_string([answer], space)
+        placeholders['answer'] = self._build_placeholder([answer], space)
 
         return placeholders
 
@@ -132,6 +131,7 @@ class Data(object):
 
         Return a copy of the given string with a buffer on both ends.
         """
+        types = len(self._settings.types)
         s = ''
         for string in strings:
             if string.find('>') >= 0:
@@ -139,7 +139,7 @@ class Data(object):
                 space_1 = space - 1
                 s += '{' + string.format(space_0, space_1) + '}'
             else:
-                space_0 = (self._settings.types*2) + space - 1
+                space_0 = (types*2) + space - 1
                 s += '{' + string.format(space_0) + '}'
         return s
 
@@ -169,24 +169,43 @@ class Data(object):
         exec 'self.{} = replica'.format(attribute)
 
 
+#-----------------------------------------------------------------------------
+
+
+    #-----Public property prescriptors-----
+
+    @answer.setter
+    def answer(self, answer):
+        self._check_combo(answer)
+        answer = answer.replace(' ', '')
+        answer = answer.replace('', ' ')[1:-1]
+        self._answer = answer
+
+
+    #-----Private property prescriptors-----
+
+    @_guesses.setter
+    def _guesses(self, guesses):
+        guesses = list(guesses[:])
+        for i, guess in enumerate(guesses):
+            self._check_combo(guess)
+            guesses[i] = guess.replace(' ', '')
+            guesses[i] = guess.replace('', ' ')[1:-1]
+        self.__guesses = guesses
+
+    @_hints.setter
+    def _hints(self, hints):
+        hints = list(hints[:])
+        for i, hint in enumerate(hints):
+            self._check_hint(hint)
+            hints[i] = hint
+        self.__hints = hints
+
+
     #-----Magic methods-----
 
-    def __init__(self, settings):
-        """Assumes settings is a settings dictionary.
-
-        Create a GameRep with the given arguments."""
-        # Helper variables
-        placeholder = (" _"*settings.length)[1:]
-
-        # Initialize attributes
-        self.__settings = settings
-        self.__placeholders = self._build_placeholders()
-        self.__guesses = [placeholder for attempt in
-                          xrange(settings.attempts)]
-        self.__hints = ['' for attempt in xrange(settings.attempts)]
-        self._answer = placeholder
-
     def __str__(self):
+        s = ''
         for i, string in enumerate(self._placeholders['guesses']):
             s += string.format(guess=self._guesses[i], seperator='|',
                                hint=self._hints[i])+'\n\n'
@@ -195,4 +214,41 @@ class Data(object):
         return s
 
 
-# header = ''.join([' '+c for c in letters])[1:]
+    #-----Error checking methods-----
+
+    def _check_combo(self, combo):
+        if type(combo) is not str:
+            raise TypeError('{} must be a combination string.'.format(combo))
+        if len(combo) != self._settings.length:
+            raise ValueError(
+                '{} must be exactly '.format(combo) +
+                '{} characters long.'.format(self._settings.length))
+        for c in set(combo):
+            if c not in self._settings.types:
+                raise ValueError(
+                    '{} must be composed of ['.format(combo) +
+                    '{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
+
+    def _check_hint(self, hint):
+        for c in set(hint):
+            if c not in (EXACT, SIMILAR):
+                raise ValueError(
+                    '{} must be composed of ['.format(hint) +
+                    '{}, {}]'.format(EXACT, SIMILAR))
+        if len(hint) > self._settings.length:
+            raise ValueError(
+                '{} must be <= '.format(hint) +
+                '{} character long.'.format(self._settings.length))
+
+
+#-----------------------------------------------------------------------------
+
+
+def test():
+    from settings import Settings
+
+    data = Data(Settings())
+    print data
+
+if __name__ == '__main__':
+    test()

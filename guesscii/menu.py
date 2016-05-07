@@ -1,11 +1,13 @@
 import subprocess, time
 
 class Menu(object):
-    """Display information to the user and access game data.
+    """A database of pages to display pages to the user.
 
     Public methods:
         push ----- Go to another page
         back ----- Go to the previous page
+
+    Calling the menu calls the last page on the page stack.
 
     The push and back methods are intended to be used right before
         calling the menu again.
@@ -24,7 +26,7 @@ class Menu(object):
             for page in pages:
                 assert callable(page), page
         except AssertionError as e:
-            raise TypeError(type(e.args[0]) + ' must be callable.')
+            raise TypeError('{} must be callable.'.format(type(e.args[0])))
         self.__pages = pages
 
 
@@ -47,7 +49,7 @@ class Menu(object):
         """Remove the last page from the page stack.
 
         Side Effects:
-            Modify the private pages property.
+            Modifies the private pages property.
         """
         pages = self._pages[:-1]
         self._pages = pages

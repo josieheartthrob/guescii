@@ -1,6 +1,7 @@
 import subprocess
 
 class Page(object):
+    """"""
 
     #-----Public properties-----
 
@@ -25,14 +26,19 @@ class Page(object):
 
     @options.setter
     def options(self, other):
+        if not callable(other):
+            raise TypeError(
+                '{} must be a callable object'.format(type(other)))
         self._options = options
 
     @order.setter
     def order(self, other):
-        self._order = order
+        self._order = other
 
     @body.setter
     def body(self, other):
+        if not hasattr(other, '__str__'):
+            raise TypeError('{} must be a string'.format(other))
         self._body = other
 
 
@@ -114,29 +120,3 @@ def test():
 
 if __name__ == '__main__':
     test()
-
-# option, args, kwargs = menu page, (), {}
-# while True
-#     option, args, kwargs = option(*args, **kwargs)
-
-# call settings page option
-#     display page
-#     get [change settings] input from user
-#     parse input to option key, args, kwargs
-#         parse input to settings
-#         key = settings key, args = (settings), kwargs = {}
-#         return key, args, kwargs
-#     return option dict[settings key], args, kwargs
-
-# call change settings option with settings arg
-#     change current settings
-#     change settings page body to inform user changes were saved
-#     return settings page option
-
-# call settings page option
-#     display the page
-#     get [go back] input from the user
-#     parse input to option key, args, kwargs
-#         key = user input, args = (), kwargs = {}
-#         return key, args, kwargs
-#     return option dict[key], args, kwargs
