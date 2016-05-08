@@ -1,11 +1,36 @@
-import string, re
-
 # Global variables
 EXACT = 'x'
 SIMILAR = 'o'
 
 class Data(object):
     """A class that contains all the information to repreent the game. Printing an instance of the class will print the game."""
+
+    def __init__(self, settings):
+        """Create a Data object.
+
+        Arguments:
+            settings ------ A Settings object.
+
+        Public properties:
+            answer -------- A string as the answer combination.
+
+              It' i's initialized as a placeholder but can be set to a
+              combination string. It's intended use is to reveal the answer
+              to the user once they've finished a game.
+
+        Public methods:
+            add_guess ----- Add a guess to the list of guesses.
+            add_hint ------ Add a hint to the list of hints.
+        """
+        # Helper variables
+        placeholder = (" _"*settings.length)[1:]
+
+        # Initialize attributes
+        self.__settings = settings
+        self.__placeholders = self._build_placeholders()
+        self._guesses = [placeholder for attempt in xrange(settings.attempts)]
+        self._hints = ['' for attempt in xrange(settings.attempts)]
+        self._answer = placeholder
 
     #-----Public properties-----
 
@@ -27,6 +52,9 @@ class Data(object):
             Modifies the private guesses property by replacing the next
             placeholder with the specified guess.
         """
+        self._check_combo(guess)
+        guess = guess.replace(' ', '')
+        guess = guess.replace('', ' ')[1:-1]
         self._add_item('_guesses', guess, lambda s: s.find("_") >= 0)
 
     def add_hint(self, hint):
@@ -34,32 +62,15 @@ class Data(object):
 
         Arguments:
             hint ----- a string less than or equal to the combination length.
-                         It's only composed of the EXACT and SIMILAR global
-                         variables.
+                       It's only composed of the EXACT and SIMILAR global
+              variables.
 
         Side Effects:
             Modifies the private hints property by replacing the next
             placeholder with the specified hint.
         """
+        self._check_hint(hint)
         self._add_item('_hints', hint, lambda s: len(s) == 0)
-
-
-    #-----Constructor method-----
-
-    def __init__(self, settings):
-        """Assumes settings is a settings dictionary.
-
-        Create a GameRep with the given arguments."""
-        # Helper variables
-        placeholder = (" _"*settings.length)[1:]
-
-        # Initialize attributes
-        self.__settings = settings
-        self.__placeholders = self._build_placeholders()
-        self.__guesses = [placeholder for attempt in
-                          xrange(settings.attempts)]
-        self.__hints = ['' for attempt in xrange(settings.attempts)]
-        self._answer = placeholder
 
 
 #-----------------------------------------------------------------------------
@@ -78,27 +89,18 @@ class Data(object):
         """A list of placeholder strings."""
         return self.__placeholders.copy()
 
-    # Mutable
-    @property
-    def _guesses(self):
-        """A list of guesses the user has made."""
-        return self.__guesses[:]
-
-    @property
-    def _hints(self):
-        """A list of hints displayed to the user."""
-        return self.__hints[:]
-
 
     #-----Private methods-----
 
     def _build_placeholders(self):
         """Create a dictionary of guess and hint placeholders."""
-        # This method makes use of the string-formatting mini-language
+        # This method makes heavy-ish use of the string-formatting
+        #   mini-language
 
         # Helper variables
         types = len(self._settings.types)
         length = self._settings.length
+        guess_strings = ('guess: >{}', 'seperator: ^{}', 'hint')
 
         # Derived Helper variables
         base = (max(types, length)*2) - 1
@@ -106,67 +108,68 @@ class Data(object):
         full = base + space + 1
 
         # Main algorithm
-
-        # Aligns the amount of specified spaces on either side
         header = self._build_placeholder(['types: ^{}'], space)
-        placeholders = {'header': header}
-
-        guess_strings = ('guess: >{}', 'seperator: ^{}', 'hint')
         guesses = [self._build_placeholder(guess_strings, space) for
                    attempt in xrange(self._settings.attempts)]
-        placeholders['guesses'] = guesses
+        answer = self._build_placeholder(['answer: >{}'], space)
 
-        placeholders['seperator'] = "_"*full + '\n\n'
-
-        answer = 'answer: >{}'
-        placeholders['answer'] = self._build_placeholder([answer], space)
-
+        placeholders = {'header': header, 'guesses': guesses,
+                        'answer': answer, 'seperator': '_'*full+'\n\n'}
         return placeholders
 
     def _build_placeholder(self, strings, space):
-        """Assumes string is a string;
-        length is a positive integer;
+        """Return a buffered placeholder string.
 
-        string is a part of the representation of the game. (This method only produces the desired results for the representation of the game).
-
-        Return a copy of the given string with a buffer on both ends.
+        Arguments:
+            strings ----- A list of placeholder strings.
+            space ------- An int as the amount of spaces to buffer with.
         """
+        # Helper variables
         types = len(self._settings.types)
+
+        # Main algorithm
         s = ''
-        for string in strings:
-            if string.find('>') >= 0:
+        for placeholder_string in strings:
+            if placeholder_string.find('>') >= 0:
                 space_0 = (self._settings.length*2) + space - 1
                 space_1 = space - 1
-                s += '{' + string.format(space_0, space_1) + '}'
+                s += '{' + placeholder_string.format(space_0, space_1) + '}'
             else:
                 space_0 = (types*2) + space - 1
-                s += '{' + string.format(space_0) + '}'
+                s += '{' + placeholder_string.format(space_0) + '}'
         return s
 
-    def _find_placeholder(self, strings, is_placeholder):
-        """Assumes strings is a list of strings;
-        is_placeholder is a  function that takes a  string as input and
-        returns a boolean value;
+    def _add_item(self, attribute, item, function):
+        """Replace a placeholder in a placeholder list.
 
-        Return  an integer as the index in  strings where a placeholder
-        first occurs."""
+        Arguments:
+            attribute ----- The placeholder list to modify.
+            item ---------- The item to replace with.
+            function ------ A funciton that determines which placeholder
+                            should be replaced
+
+        Side Effects:
+            Modifies the specified attribute by replacing the placeholder
+            found by th specified function with the specified item
+        """
+        replica = getattr(self, attribute)
+        i = self._find_placeholder(replica, function)
+        exec 'self.{}[i] = item'.format(attribute)
+
+    def _find_placeholder(self, strings, is_placeholder):
+        """Return an integer as the index of the first occuring placeholder.
+
+        Arguments:
+            strings ------------ A list of placeholders.
+            is_placeholder ----- a function that determines wether or not
+                                 a string is a placeholder. It takes a string
+              as input and returns a bool.
+        """
 
         for i, s in enumerate(strings):
             if is_placeholder(s):
                 return i
         raise IndexError
-
-    def _add_item(self, attribute, item, function):
-        """Assumes attribute is a representation attribute;
-        item is an object with the relevant typing;
-        function is a filter function for the _find_placeholder method;
-
-        add an item to the specified attribute."""
-
-        replica = getattr(self, attribute)
-        i = self._find_placeholder(replica, function)
-        replica[i] = item
-        exec 'self.{} = replica'.format(attribute)
 
 
 #-----------------------------------------------------------------------------
@@ -182,33 +185,14 @@ class Data(object):
         self._answer = answer
 
 
-    #-----Private property prescriptors-----
-
-    @_guesses.setter
-    def _guesses(self, guesses):
-        guesses = list(guesses[:])
-        for i, guess in enumerate(guesses):
-            self._check_combo(guess)
-            guesses[i] = guess.replace(' ', '')
-            guesses[i] = guess.replace('', ' ')[1:-1]
-        self.__guesses = guesses
-
-    @_hints.setter
-    def _hints(self, hints):
-        hints = list(hints[:])
-        for i, hint in enumerate(hints):
-            self._check_hint(hint)
-            hints[i] = hint
-        self.__hints = hints
-
-
     #-----Magic methods-----
 
     def __str__(self):
         s = ''
-        for i, string in enumerate(self._placeholders['guesses']):
-            s += string.format(guess=self._guesses[i], seperator='|',
-                               hint=self._hints[i])+'\n\n'
+        for i, placeholder_string in enumerate(self._placeholders['guesses']):
+            s += placeholder_string.format(
+                guess=self._guesses[i], seperator='|',
+                hint=self._hints[i])+'\n\n'
         s += self._placeholders['seperator']+'\n'
         s += self._placeholders['answer'].format(answer=self._answer)+'\n\n'
         return s
