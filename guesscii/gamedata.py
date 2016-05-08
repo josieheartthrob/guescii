@@ -219,12 +219,13 @@ class Data(object):
     def _check_combo(self, combo):
         if type(combo) is not str:
             raise TypeError('{} must be a combination string.'.format(combo))
+        combo = combo.replace(' ', '')
         if len(combo) != self._settings.length:
             raise ValueError(
                 '{} must be exactly '.format(combo) +
                 '{} characters long.'.format(self._settings.length))
         for c in set(combo):
-            if c not in self._settings.types:
+            if c not in self._settings.types+'_':
                 raise ValueError(
                     '{} must be composed of ['.format(combo) +
                     '{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
@@ -245,10 +246,45 @@ class Data(object):
 
 
 def test():
+    import subprocess
     from settings import Settings
+
+    def clear():
+        raw_input('> ')
+        subprocess.call('cls', shell=True)
+
+    def print_guesses(data):
+        for guess in data._guesses:
+            print guess
+        clear()
+
+    def print_hints(data):
+        for hint in data._hints:
+            print hint
+        clear()
 
     data = Data(Settings())
     print data
+    clear()
+
+    print_guesses(data)
+
+    data.add_guess('aabb')
+    print_guesses(data)
+
+    print data
+    clear()
+
+    data.add_hint('xxxx')
+    print_hints(data)
+    print_guesses(data)
+
+    print data
+    clear()
+
+    data.answer = 'aabb'
+    print data
+    clear()
 
 if __name__ == '__main__':
     test()

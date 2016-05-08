@@ -3,6 +3,33 @@ import subprocess
 class Page(object):
     """"""
 
+    def __init__(self, header, body, options, order,
+                 parse=lambda x: (x, (), {})):
+        """Create a page object.
+
+        Arguments:
+            header ----- A string that let's the user know what the
+                            page is about.
+            body ------- A string that gives the user any information.
+            options ---- a dictionary of option objects where each key is
+                            the relative item's (option object's) key
+            order ------ An ordered container object as the order in which
+                            to display the options to the page
+
+        Keyword Arguments:
+            parse ------ A callable object that parses the data entered by
+                            the user when the page is called.
+
+                            It should return an a key to access one of the
+                            page's options, and arguments and keyword
+                            arguments to call the option with.
+        """
+        self._header = header
+        self._body = body
+        self._options = options
+        self._order = order
+        self._parse = parse
+
     #-----Public properties-----
 
     @property
@@ -44,33 +71,6 @@ class Page(object):
 
     #-----Magic methods-----
 
-    def __init__(self, header, body, options, order,
-                 parse=lambda x: (x, (), {})):
-        """Create a page object.
-
-        Arguments:
-            header ----- A string that let's the user know what the
-                            page is about.
-            body ------- A string that gives the user any information.
-            options ---- a dictionary of option objects where each key is
-                            the relative item's (option object's) key
-            order ------ An ordered container object as the order in which
-                            to display the options to the page
-
-        Keyword Arguments:
-            parse ------ A callable object that parses the data entered by
-                            the user when the page is called.
-
-                            It should return an a key to access one of the
-                            page's options, and arguments and keyword
-                            arguments to call the option with.
-        """
-        self._header = header
-        self._body = body
-        self._options = options
-        self._order = order
-        self._parse = parse
-
     def __str__(self):
         s = '[{}]\n\n'.format(self.header)
         if self._body:
@@ -90,6 +90,10 @@ class Page(object):
                 return
             except KeyError:
                 continue
+
+
+#-----------------------------------------------------------------------------
+
 
 def test():
     import time

@@ -1,5 +1,6 @@
 import string, subprocess, random
 from gamedata import Data, EXACT, SIMILAR
+from page import Page
 
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
@@ -11,29 +12,30 @@ class Game(object):
         #-----Private properties-----
 
         # Immutable
-        @property
-        def _settings(self):
-            """The settings used to create the game."""
-            return self.__settings
+    @property
+    def _settings(self):
+        """The settings used to create the game."""
+        return self.__settings
 
-        @property
-        def _types(self):
-            """The string of different letters that make each combination."""
-            return self.__types
+    @property
+    def _answer(self):
+        """The answer combination."""
+        return self.__answer
 
-        @property
-        def _answer(self):
-            """The answer combination."""
-            return self.__answer
+    # Mutable
+    @property
+    def _data(self):
+        """The data used to display to the user."""
+        return self.__data
 
-        # Mutable
-        @property
-        def _data(self):
-            """The data used to display to the user."""
+    @property
+    def _page(self):
+        """The page object that displays the game."""
+        return self.__page
 
-        @property
-        def _page(self):
-            """The page object that displays the game."""
+    @property
+    def _order(self):
+        return self.__order
 
 
     #-----Public methods-----
@@ -58,7 +60,7 @@ class Game(object):
 
             if guess == self._answer:
                 self._data.answer = self._answer
-                yield self._page.options['n']
+                break
             elif guess in self._page.order:
                 yield self._page.options[guess]
 
@@ -69,6 +71,8 @@ class Game(object):
 
             self._page.body = self._data.__str__()
 
+        yield self._page.options['n']
+
 
     #-----Private methods-----
 
@@ -76,7 +80,7 @@ class Game(object):
         """Create a randomized answer combination."""
         answer = ''
         for i in xrange(self._settings.length):
-            answer += random.choice(self._types)
+            answer += random.choice(self._settings.types)
         return answer
 
     def _build_hint(self, guess):
@@ -101,24 +105,24 @@ class Game(object):
                         c in answer_map if c in guess_map]) - exact)
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
 
-        def _parse_user_input(self, data):
-            """Parse data to call an option or evaluate a guess.
+    def _parse_user_input(self, data):
+        """Parse data to call an option or evaluate a guess.
 
-            Arguments:
-                data ----- a string entered by the user
-            """
+        Arguments:
+            data ----- a string entered by the user
+        """
 
-            if data in self._page.order:
-                return data, (), {}
-            else:
-                return self._data_to_guess(data), (), {}
+        if data in self._order:
+            return data, (), {}
+        else:
+            return self._data_to_guess(data), (), {}
 
-        def _data_to_guess(self, data):
-            """Assumes data is  a string.
-            Create a new combo string based off data.
-            Raise an exception if it can't be translated.
-            """
-            return re.sub(' ', '', data)
+    def _data_to_guess(self, data):
+        """Assumes data is  a string.
+        Create a new combo string based off data.
+        Raise an exception if it can't be translated.
+        """
+        return re.sub(' ', '', data)
 
 
     #-----Magic methods-----
@@ -129,8 +133,20 @@ class Game(object):
         Order is sequence of characters that represents the option order."""
 
         self.__settings = settings
-        self.__types = string.lowercase[:settings.types]
+        self.__order = order
         self.__data = Data(settings)
-        self.__page = Page(self._types, self._data.__str__(), options,
-                           order, self._parse_user_input)
+        self.__page = Page(self._settings.types, self._data.__str__(),
+                           options, order, self._parse_user_input)
         self.__answer = self._build_answer()
+
+def test():
+    from settings import Settings
+    from option import Option
+
+    settings = Settings(6, 4, 5)
+    options = {'q': Option('q', 'quit', quit)}
+    game = Game(settings, options, ['q'])
+    game.main()
+
+if __name__ == '__main__':
+    test()

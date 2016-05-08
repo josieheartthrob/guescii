@@ -9,28 +9,6 @@ class Option(object):
                    the option when creating an option dictionary.
         name --- the string display to the user as the option's name."""
 
-    #-----Public properties-----
-
-    # Immutable
-    @property
-    def key(self):
-        return self._key
-
-    @property
-    def name(self):
-        return self._name
-
-
-    #-----Private properties-----
-
-    @property
-    def _function(self):
-        # The functionality of the option
-        return self.__function
-
-
-    #-----Magic methods-----
-
     def __init__(self, key, name, function):
         """Create an option object
 
@@ -55,11 +33,37 @@ class Option(object):
         self._name = name
         self.__function = function
 
+    #-----Public properties-----
+
+    # Immutable
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def name(self):
+        return self._name
+
+
+    #-----Private properties-----
+
+    @property
+    def _function(self):
+        # The functionality of the option
+        return self.__function
+
+
+    #-----Magic methods-----
+
     def __str__(self):
         return '> {0.key} - {0.name}'.format(self)
 
     def __call__(self, *args, **kwargs):
         return self._function(*args, **kwargs)
+
+
+#-----------------------------------------------------------------------------
+
 
 def test():
     from subprocess import call

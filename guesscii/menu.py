@@ -13,21 +13,9 @@ class Menu(object):
         calling the menu again.
     """
 
-    #-----Private properties-----
-
-    @property
-    def _pages(self):
-        return self.__pages[:]
-
-    # Re-wrote some defensive programming
-    @_pages.setter
-    def _pages(self, pages):
-        try:
-            for page in pages:
-                assert callable(page), page
-        except AssertionError as e:
-            raise TypeError('{} must be callable.'.format(type(e.args[0])))
-        self.__pages = pages
+    def __init__(self):
+        """Create a Menu object."""
+        self.__pages = []
 
 
     #-----Public methods-----
@@ -55,17 +43,29 @@ class Menu(object):
         self._pages = pages
 
 
-    #-----Magic methods-----
+    #-----Private properties-----
 
-    def __init__(self):
-        """Create a Menu object."""
-        self.__pages = []
+    @property
+    def _pages(self):
+        return self.__pages[:]
+
+    @_pages.setter
+    def _pages(self, pages):
+        try:
+            for page in pages:
+                assert callable(page), page
+        except AssertionError as e:
+            raise TypeError('{} must be callable.'.format(type(e.args[0])))
+        self.__pages = pages
+
+
+    #-----Magic methods-----
 
     def __call__(self):
         self._pages[-1]()
 
 
-#------------------Testing------------------
+#------------------Testing--------------------
 
 def test():
     from page import Page
