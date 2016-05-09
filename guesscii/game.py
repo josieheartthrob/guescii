@@ -14,10 +14,13 @@ class Game(object):
         Options is a dictionary of options;
         Order is sequence of characters that represents the option order."""
 
+        options = options.copy()
+        options['/g'] = lambda x: x
+
         self.__settings = settings
         self.__order = order
         self.__data = Data(settings)
-        self.__page = Page(self._settings.types, self._data.__str__(),
+        self.__page = Page('', self._data.__str__(),
                            options, order, self._parse)
         self.__answer = self._build_answer()
 
@@ -54,8 +57,6 @@ class Game(object):
             self._data.add_hint(hint)
 
             self._page.body = self._data.__str__()
-
-        yield self._page.options['n']
 
 
     #-----Private properties-----
@@ -113,7 +114,7 @@ class Game(object):
         answer_map = {c: self._answer.count(c) for c in  set(self._answer)}
 
         # Main algorithm
-        exact = sum([1 for i, c in enumerate(guess) if c == answer[i]])
+        exact = sum([1 for i, c in enumerate(guess) if c == self._answer[i]])
         similar = (sum([min(guess_map[c], answer_map[c]) for
                         c in answer_map if c in guess_map]) - exact)
         return EXACT_CHAR*exact + SIMILAR_CHAR*similar
@@ -124,11 +125,10 @@ class Game(object):
         Arguments:
             data ----- a string entered by the user
         """
-
         if data in self._order:
             return data, (), {}
         else:
-            return self._data_to_guess(data), (), {}
+            return '/g', [self._data_to_guess(data)], {}
 
     def _data_to_guess(self, data):
         """Parse data into a combination string.
@@ -169,7 +169,9 @@ def test():
     settings = Settings(6, 4, 5)
     options = {'q': Option('q', 'quit', quit)}
     game = Game(settings, options, ['q'])
-    game._page()
+    for option in game.main():
+        print 'option:', option
+        raw_input('>>')
 
 if __name__ == '__main__':
     test()

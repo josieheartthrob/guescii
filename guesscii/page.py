@@ -72,7 +72,9 @@ class Page(object):
     #-----Magic methods-----
 
     def __str__(self):
-        s = '[{}]\n\n'.format(self.header)
+        s = ''
+        if self._header:
+            s += '[{}]\n\n'.format(self.header)
         if self._body:
             s += self._body + '\n\n'
         for key in self._order:
@@ -86,8 +88,7 @@ class Page(object):
                 subprocess.call('cls', shell=True)
                 print self
                 key, args, kwargs = self._parse(raw_input('> '))
-                self.options[key](*args, **kwargs)
-                return
+                return self.options[key](*args, **kwargs)
             except KeyError:
                 continue
 
