@@ -100,7 +100,7 @@ class Data(object):
         # Helper variables
         types = len(self._settings.types)
         length = self._settings.length
-        guess_strings = ('guess: >{}', 'seperator: ^{}', 'hint')
+        guess_strings = ('guess: >{}', 'seperator: >{}', 'hint: >{}')
 
         # Derived Helper variables
         base = (max(types, length)*2) - 1
@@ -129,14 +129,21 @@ class Data(object):
 
         # Main algorithm
         s = ''
-        for placeholder_string in strings:
-            if placeholder_string.find('>') >= 0:
-                space_0 = (self._settings.length*2) + space - 1
-                space_1 = space - 1
-                s += '{' + placeholder_string.format(space_0, space_1) + '}'
+        for placeholder in strings:
+            if placeholder.find('types') >= 0:
+                space = (types*2)-1 + space
+            elif (placeholder.find('guess') >= 0 or
+                    placeholder.find('answer') >= 0):
+                space = (self._settings.length*2)-1 + space
+            elif placeholder.find('seperator') >= 0:
+                space = 6
+            elif placeholder.find('hint') >= 0:
+                space = self._settings.length+2
+            elif placeholder.find('answer') >=  0:
+                space = space
             else:
-                space_0 = (types*2) + space - 1
-                s += '{' + placeholder_string.format(space_0) + '}'
+                raise KeyError("{} isn't a key".format(placeholder))
+            s += '{'+placeholder.format(space)+'}'
         return s
 
     def _add_item(self, attribute, item, function):
@@ -188,7 +195,9 @@ class Data(object):
     #-----Magic methods-----
 
     def __str__(self):
-        s = ''
+        header = self._settings.types.replace('', ' ')[1:-1]
+        header = self._placeholders['header'].format(types=header)
+        s = '[{}]\n\n'.format(header)
         for i, placeholder_string in enumerate(self._placeholders['guesses']):
             s += placeholder_string.format(
                 guess=self._guesses[i], seperator='|',
