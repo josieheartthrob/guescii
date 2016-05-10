@@ -1,5 +1,6 @@
 import random, subprocess, re
 from menu import Menu
+from page import Page
 from game import Game
 from option import Option
 from settings import Settings
@@ -7,7 +8,66 @@ from settings import Settings
 class Guesscii(object):
     """The main class that handles the program."""
 
+    def __init__(self):
+        self.__defaults = Settings()
+        self.__settings = self._defaults
+        self.__menu = Menu()
+        self._pages['menu'] = Page('Menu', '', {
+            'n': Option('n', 'new game', self.new_game),
+            'q': Option('q', 'quit', quit),
+            's': Option('s', 'settings', self._menu.push),
+            'h': Option('h', 'help', self._menu.push),
+            'i': Option('i', 'about', self._menu.push),
+            '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'],
+            self._parse_menu)
+        self._pages =  {
+            'help': Page('Help', 'coming soon', {
+                'b': Option('b', 'back', self._menu.back)}, ['b']),
+            'about': Page('About', 'coming soon', {
+                'b': Option('b', 'back', self._menu.back)}, ['b']),
+            'types': Page('Change amount of letters to choose from', '', {
+                'c': Option('c', 'cancel', self._menu.back)}, ['c']),
+            'length': Page('Change the length of the combination', '', {
+                'c': Option('c', 'cancel', self._menu.back)}, ['c']),
+            'attempts': Page('Change the amount of attempts allowed', '', {
+                'c': Option('c', 'cancel', self._menu.back)}, ['c'])}
+        self._pages['settings'] = Page('Settings', '', {
+            'r': Option('r', 'restore defaults', self._restore_defaults),
+            't': Option('t', 'types', self._pages['types']),
+            'l': Option('l', 'length', self._pages['length']),
+            'a': Option('a', 'attempts', self._pages['attempts']),
+            'b': Option('b', 'back', self._menu.back),
+            's': Option('s', 'change all settings', self._parse_settings),
+            '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
+            self._parse_settings)
+        self._menu.push(self._pages['menu'])
+        self.__game = None
+
+    #--------------------------------------------------------------------------
+
+
+    # -----Public methods-----
+
+    def main(self):
+        """The main loop of the game."""
+        while True:
+            self._menu()
+
+    def new_game(self):
+        """Play the game with the current settings."""
+        del self._game
+        self._game = Game(self.settings)
+        option = self._game.main()
+
+    def continue_game(self):
+        """Continue the current game."""
+        option = self._game.main()
+
     # -----Private properties-----
+
+    @property
+    def _menu(self):
+        return self.__menu
 
     @property
     def _options(self):
@@ -90,39 +150,21 @@ class Guesscii(object):
         # Main algorithm
         self.__options = options
 
-    #--------------------------------------------------------------------------
-
-
-    # -----Public methods-----
-
-    def main(self):
-        """The main loop of the game."""
-        while True:
-            self._menu()
-
-    def new_game(self):
-        """Play the game with the current settings."""
-        del self._game
-        self._game = Game(self.settings)
-        option = self._game.main()
-
-    def continue_game(self):
-        """Continue the current game."""
-        option = self._game.main()
-
 
     # -----Private methods-----
 
-    def _restore_defaults(self):
-        self._settings = self._defaults
-
-    def parse_menu(self, data):
+    def _parse_menu(self, data):
         if data == 'n':
             return data, (self._settings), {}
-        elif data in self._pages['settings'].order:
-            return data, (), {}
+        elif data == 'q':
+        elif data == 's':
+        elif data == 'h':
+        elif data == 'i':
         else:
             raise ValueError
+
+    def _restore_defaults(self):
+        self._settings = self._defaults
 
     def _parse_settings(self, data):
         if data in self._pages['settings'].order:
@@ -145,43 +187,6 @@ class Guesscii(object):
         settings = Settings(types=settings['t'],
             length=settings['l'], attempts=settings['a'])
         return settings
-
-
-    # -----Magic methods-----
-
-    def __init__(self):
-        self.__defaults = Settings()
-        self.__settings = self.defaults
-        self.__menu = Menu()
-        self._pages =  {
-            'help': Page('Help', 'coming soon', {
-                'b': Option('b', 'back', self.menu.back)}, ['b']),
-            'about': Page('About', 'coming soon', {
-                'b': Option('b', 'back', self.menu.back)}, ['b']),
-            'types': Page('Change amount of letters to choose from', '', {
-                'c': Option('c', 'cancel', self.menu.back)}, ['c']),
-            'length': Page('Change the length of the combination', '', {
-                'c': Option('c', 'cancel', self.menu.back)}, ['c']),
-            'attempts': Page('Change the amount of attempts allowed', '', {
-                'c': Option('c', 'cancel', self.menu.back)}, ['c'])}
-        self._pages['settings'] = Page('Settings', '', {
-            'r': Option('r', 'restore defaults', self._restore_defaults),
-            't': Option('t', 'types', self._pages['types']),
-            'l': Option('l', 'length', self._pages['length']),
-            'a': Option('a', 'attempts', self._pages['attempts']),
-            'b': Option('b', 'back', self.menu.back),
-            's': Options('s', 'change all settings', self._parse_settings),
-            '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
-            self._parse_settings)
-        self._pages['menu'] = Page('Menu', '', {
-            'n': Option('n', 'new game', self.new_game),
-            'q': Option('q', 'quit', quit),
-            's': Option('s', 'settings', self.pages['settings'])
-            'h': Option('h', 'help', self.pages['help']),
-            'i': Option('i', 'about', self.pages['about']),
-            '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'])
-        self._menu.push(self.pages['menu'])
-        self.__game = None
 
 if __name__ == '__main__':
     guesscii = Guesscii()

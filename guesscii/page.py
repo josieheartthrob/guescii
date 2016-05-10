@@ -83,13 +83,22 @@ class Page(object):
 
     def __call__(self):
         key = ''
+        old_key = ''
+        error = '\n\n"{}" is not a valid input'
         while True:
+            subprocess.call('cls', shell=True)
+            print self
+            key, args, kwargs = self._parse(raw_input('> '))
+            if old_key:
+                i = self.body.find(error.format(old_key))
+                if i >= 0:
+                    self._body = self._body[:i]
             try:
-                subprocess.call('cls', shell=True)
-                print self
-                key, args, kwargs = self._parse(raw_input('> '))
-                return self.options[key](*args, **kwargs)
+                x = self.options[key](*args, **kwargs)
+                return x
             except KeyError:
+                self.body += error.format(key)
+                old_key = key
                 continue
 
 
@@ -97,30 +106,29 @@ class Page(object):
 
 
 def test():
-    import time
     from option import Option
     def say(something):
         subprocess.call('cls', shell=True)
         print something
-        time.sleep(1)
+        raw_input('> ')
+
+    def bye():
+        say('bye')
+        subprocess.call('cls', shell=True)
+        quit()
 
     def parse(data):
         key, args, kwargs = data, (), {}
         if data == 'h':
             args = ('hi',)
-        elif data == 'b':
-            args = ('bye',)
-        else:
-            print 'invalid input'
-            raise ValueError
         return key, args, kwargs
 
     page = Page('test page', 'some\narbitrary\nwords',
         {'h': Option('h', 'say hi', say),
-         'b': Option('b', 'say bye', say)},
+         'b': Option('b', 'say bye', bye)},
         ['h', 'b'], parse)
 
-    for i in xrange(3):
+    while True:
         page()
 
 if __name__ == '__main__':

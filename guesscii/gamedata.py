@@ -42,7 +42,7 @@ class Data(object):
 
     #-----Public methods-----
 
-    def add_guess(self, guess):
+    def add_guess(self, guess, i):
         """Add a guess to the list of guesses.
 
         Arguments:
@@ -55,9 +55,9 @@ class Data(object):
         self._check_combo(guess)
         guess = guess.replace(' ', '')
         guess = guess.replace('', ' ')[1:-1]
-        self._add_item('_guesses', guess, lambda s: s.find("_") >= 0)
+        self._guesses[i] = guess
 
-    def add_hint(self, hint):
+    def add_hint(self, hint, i):
         """Add a hint to the list of hints.
 
         Arguments:
@@ -70,7 +70,7 @@ class Data(object):
             placeholder with the specified hint.
         """
         self._check_hint(hint)
-        self._add_item('_hints', hint, lambda s: len(s) == 0)
+        self._hints[i] = hint
 
 
 #-----------------------------------------------------------------------------
@@ -145,38 +145,6 @@ class Data(object):
                 raise KeyError("{} isn't a key".format(placeholder))
             s += '{'+placeholder.format(space)+'}'
         return s
-
-    def _add_item(self, attribute, item, function):
-        """Replace a placeholder in a placeholder list.
-
-        Arguments:
-            attribute ----- The placeholder list to modify.
-            item ---------- The item to replace with.
-            function ------ A funciton that determines which placeholder
-                            should be replaced
-
-        Side Effects:
-            Modifies the specified attribute by replacing the placeholder
-            found by th specified function with the specified item
-        """
-        replica = getattr(self, attribute)
-        i = self._find_placeholder(replica, function)
-        exec 'self.{}[i] = item'.format(attribute)
-
-    def _find_placeholder(self, strings, is_placeholder):
-        """Return an integer as the index of the first occuring placeholder.
-
-        Arguments:
-            strings ------------ A list of placeholders.
-            is_placeholder ----- a function that determines wether or not
-                                 a string is a placeholder. It takes a string
-              as input and returns a bool.
-        """
-
-        for i, s in enumerate(strings):
-            if is_placeholder(s):
-                return i
-        raise IndexError
 
 
 #-----------------------------------------------------------------------------
@@ -262,13 +230,13 @@ def test():
 
     print_guesses(data)
 
-    data.add_guess('aabb')
+    data.add_guess('aabb', 0)
     print_guesses(data)
 
     print data
     clear()
 
-    data.add_hint('xxxx')
+    data.add_hint('xxxx', 0)
     print_hints(data)
     print_guesses(data)
 

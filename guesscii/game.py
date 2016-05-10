@@ -18,11 +18,11 @@ class Game(object):
         options['/g'] = lambda x: x
 
         self.__settings = settings
-        self.__order = order
-        self.__data = Data(settings)
-        self.__page = Page('', self._data.__str__(),
-                           options, order, self._parse)
         self.__answer = self._build_answer()
+        self._order = order
+        self._data = Data(settings)
+        self._page = Page('', self._data.__str__(),
+                           options, order, self._parse)
 
 
     #-----Public methods-----
@@ -43,20 +43,35 @@ class Game(object):
             An exception if the guess entered by the user is invalid.
         """
         for i in xrange(self._settings.attempts):
-            guess = self._page()
+            error = ''
+            while True:
+                guess = self._page()
+                if error:
+                    e = self._page.body.find(error)
+                    self._page.body = self._page.body[:e]
 
-            if guess == self._answer:
-                self._data.answer = self._answer
-                break
-            elif guess in self._page.order:
-                yield self._page.options[guess]
+                if guess == self._answer:
+                    break
+                elif guess in self._page.order:
+                    yield self._page.options[guess]
 
-            self._data.add_guess(guess)
+                try:
+                    self._data.add_guess(guess, i)
+                    break
+                except ValueError as e:
+                    error = '\n\n'+e.args[0]
+                    self._page.body += error
 
             hint = self._build_hint(guess)
-            self._data.add_hint(hint)
+            self._data.add_hint(hint, i)
 
             self._page.body = self._data.__str__()
+
+        self._data.answer = self._answer
+        self._page.body = self._data.__str__()
+        subprocess.call('cls', shell=True)
+        print self._page.body
+        yield
 
 
     #-----Private properties-----
@@ -68,24 +83,9 @@ class Game(object):
         return self.__settings
 
     @property
-    def _page(self):
-        """The page object that displays the game."""
-        return self.__page
-
-    @property
     def _answer(self):
         """The answer combination."""
         return self.__answer
-
-    # Mutable
-    @property
-    def _data(self):
-        """The data used to display to the user."""
-        return self.__data
-
-    @property
-    def _order(self):
-        return self.__order
 
 
     #-----Private methods-----
@@ -139,24 +139,7 @@ class Game(object):
         Raises:
             A ValueError if it can't be translated.
         """
-        self._check_combo(data)
         return data.replace(' ', '')
-
-    #-----Error checking methods-----
-
-    def _check_combo(self, combo):
-        if type(combo) is not str:
-            raise TypeError('{} must be a combination string.'.format(combo))
-        combo = combo.replace(' ', '')
-        if len(combo) != self._settings.length:
-            raise ValueError(
-                '{} must be exactly '.format(combo) +
-                '{} characters long.'.format(self._settings.length))
-        for c in set(combo):
-            if c not in self._settings.types+'_':
-                raise ValueError(
-                    '{} must be composed of ['.format(combo) +
-                    '{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
 
 
 #------------------Testing--------------------
@@ -170,8 +153,9 @@ def test():
     options = {'q': Option('q', 'quit', quit)}
     game = Game(settings, options, ['q'])
     for option in game.main():
-        print 'option:', option
-        raw_input('>>')
+        raw_input('> ')
+        subprocess.call('cls', shell=True)
+        quit()
 
 if __name__ == '__main__':
     test()

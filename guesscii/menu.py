@@ -29,6 +29,8 @@ class Menu(object):
         Side Effects:
             Modifies the private pages property.
         """
+        print 'pushing a page'
+        raw_input('>>')
         pages = self._pages
         pages.append(page)
         self._pages = pages
@@ -62,6 +64,8 @@ class Menu(object):
     #-----Magic methods-----
 
     def __call__(self):
+        print 'pages length:', len(self._pages)
+        raw_input('>>')
         self._pages[-1]()
 
 
