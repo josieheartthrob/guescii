@@ -1,6 +1,6 @@
 import random, subprocess, re
+from page import Page, ParseError
 from menu import Menu
-from page import Page
 from game import Game
 from option import Option
 from settings import Settings
@@ -12,14 +12,6 @@ class Guesscii(object):
         self.__defaults = Settings()
         self.__settings = self._defaults
         self.__menu = Menu()
-        self._pages['menu'] = Page('Menu', '', {
-            'n': Option('n', 'new game', self.new_game),
-            'q': Option('q', 'quit', quit),
-            's': Option('s', 'settings', self._menu.push),
-            'h': Option('h', 'help', self._menu.push),
-            'i': Option('i', 'about', self._menu.push),
-            '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'],
-            self._parse_menu)
         self._pages =  {
             'help': Page('Help', 'coming soon', {
                 'b': Option('b', 'back', self._menu.back)}, ['b']),
@@ -31,13 +23,21 @@ class Guesscii(object):
                 'c': Option('c', 'cancel', self._menu.back)}, ['c']),
             'attempts': Page('Change the amount of attempts allowed', '', {
                 'c': Option('c', 'cancel', self._menu.back)}, ['c'])}
+        self._pages['menu'] = Page('Menu', '', {
+            'n': Option('n', 'new game', self.new_game),
+            'q': Option('q', 'quit', quit),
+            's': Option('s', 'settings', self._menu.push),
+            'h': Option('h', 'help', self._menu.push),
+            'i': Option('i', 'about', self._menu.push),
+            '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'],
+            self._parse_menu)
         self._pages['settings'] = Page('Settings', '', {
             'r': Option('r', 'restore defaults', self._restore_defaults),
-            't': Option('t', 'types', self._pages['types']),
-            'l': Option('l', 'length', self._pages['length']),
-            'a': Option('a', 'attempts', self._pages['attempts']),
+            't': Option('t', 'types', self._menu.push),
+            'l': Option('l', 'length', self._menu.push),
+            'a': Option('a', 'attempts', self._menu.push),
             'b': Option('b', 'back', self._menu.back),
-            's': Option('s', 'change all settings', self._parse_settings),
+            's': Option('s', 'change all settings', self._change_settings),
             '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
             self._parse_settings)
         self._menu.push(self._pages['menu'])
@@ -56,7 +56,7 @@ class Guesscii(object):
     def new_game(self):
         """Play the game with the current settings."""
         del self._game
-        self._game = Game(self.settings)
+        self._game = Game(self._settings)
         option = self._game.main()
 
     def continue_game(self):
@@ -140,39 +140,41 @@ class Guesscii(object):
     def _options(self, options):
         """Assumes options is a dictionary where each value is an opti-
         on and each key is the key for that option."""
-
-        # Defensive programming
-        try:
-            check_options(options)
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
         self.__options = options
 
 
     # -----Private methods-----
 
     def _parse_menu(self, data):
-        if data == 'n':
-            return data, (self._settings), {}
-        elif data == 'q':
-        elif data == 's':
+        args, kwargs = (), {}
+        if data == 's':
+            args = [self._pages['settings']]
         elif data == 'h':
+            args = [self._pages['help']]
         elif data == 'i':
-        else:
-            raise ValueError
+            args = [self._pages['about']]
+        elif data not in self._pages['menu'].order:
+            raise ParseError
+        return data, args, kwargs
+
+    def _parse_settings(self, data):
+        args, kwargs = (), {}
+        if data == 't':
+            args = [self._pages['types']]
+        elif data == 'l':
+            args = [self._pages['length']]
+        elif data == 'a':
+            args = [self._pages['attempts']]
+        elif len(data) > 1:
+            data, args = 's', [data]
+        elif data not in self._pages['settings'].order:
+            raise ParseError
+        return data, args, kwargs
 
     def _restore_defaults(self):
         self._settings = self._defaults
 
-    def _parse_settings(self, data):
-        if data in self._pages['settings'].order:
-            return data, (), {}
-        else:
-            return 's', (data), {}
-
-    def _data_to_settings(self, data):
+    def _change_settings(self, data):
         # Helper variables
         maximums = {'t': 30, 'l': 20, 'a': 100}
         pattern = re.compile(r'[tla]\W*\d+')
@@ -186,7 +188,7 @@ class Guesscii(object):
                 raise ValueError
         settings = Settings(types=settings['t'],
             length=settings['l'], attempts=settings['a'])
-        return settings
+        self._settings = settings
 
 if __name__ == '__main__':
     guesscii = Guesscii()

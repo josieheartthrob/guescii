@@ -18,11 +18,12 @@ class Page(object):
 
         Keyword Arguments:
             parse ------ A callable object that parses the data entered by
-                            the user when the page is called.
+                         the user when the page is called.
 
-                            It should return an a key to access one of the
-                            page's options, and arguments and keyword
-                            arguments to call the option with.
+              It should return an a key to access one of the page's options,
+              and arguments and keyword arguments to call the option with.
+              It should raise a ParseError if the data entered by the user
+              is invalid.
         """
         self._header = header
         self._body = body
@@ -83,24 +84,21 @@ class Page(object):
 
     def __call__(self):
         key = ''
-        old_key = ''
-        error = '\n\n"{}" is not a valid input'
+        i = len(self.body)
         while True:
             subprocess.call('cls', shell=True)
             print self
-            key, args, kwargs = self._parse(raw_input('> '))
-            if old_key:
-                i = self.body.find(error.format(old_key))
-                if i >= 0:
-                    self._body = self._body[:i]
+            if len(self.body) > i:
+                self.body = self.body[:i]
             try:
-                x = self.options[key](*args, **kwargs)
-                return x
-            except KeyError:
-                self.body += error.format(key)
-                old_key = key
-                continue
+                key, args, kwargs = self._parse(raw_input('> '))
+                return self.options[key](*args, **kwargs)
+            except ParseError as e:
+                self.body += '\n\n'+e.args[0]
 
+class ParseError(Exception):
+    def __init__(self, message='Invalid input.'):
+        Exception.__init__(self, message)
 
 #-----------------------------------------------------------------------------
 
@@ -121,6 +119,8 @@ def test():
         key, args, kwargs = data, (), {}
         if data == 'h':
             args = ('hi',)
+        elif data != 'b':
+            raise ParseError('"{}" is not a valid input.'.format(data))
         return key, args, kwargs
 
     page = Page('test page', 'some\narbitrary\nwords',

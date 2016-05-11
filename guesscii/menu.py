@@ -15,7 +15,7 @@ class Menu(object):
 
     def __init__(self):
         """Create a Menu object."""
-        self.__pages = []
+        self._pages = []
 
 
     #-----Public methods-----
@@ -29,11 +29,10 @@ class Menu(object):
         Side Effects:
             Modifies the private pages property.
         """
-        print 'pushing a page'
-        raw_input('>>')
-        pages = self._pages
-        pages.append(page)
-        self._pages = pages
+        if not callable(page):
+            raise TypeErrror('Only callable objects can be ' +
+                             'added to the page stack.')
+        self._pages.append(page)
 
     def back(self):
         """Remove the last page from the page stack.
@@ -41,38 +40,27 @@ class Menu(object):
         Side Effects:
             Modifies the private pages property.
         """
-        pages = self._pages[:-1]
-        self._pages = pages
+        self._pages = self._pages[:-1]
 
+    def home(self):
+        """Remove all pages from the page stack except for the first.
 
-    #-----Private properties-----
+        Side Effects:
+            Modifies the private pages property."""
+        self._pages = self._pages[:1]
 
-    @property
-    def _pages(self):
-        return self.__pages[:]
-
-    @_pages.setter
-    def _pages(self, pages):
-        try:
-            for page in pages:
-                assert callable(page), page
-        except AssertionError as e:
-            raise TypeError('{} must be callable.'.format(type(e.args[0])))
-        self.__pages = pages
 
 
     #-----Magic methods-----
 
     def __call__(self):
-        print 'pages length:', len(self._pages)
-        raw_input('>>')
         self._pages[-1]()
 
 
 #------------------Testing--------------------
 
 def test():
-    from page import Page
+    from page import Page, ParseError
     from option import Option
 
     menu = Menu()
@@ -82,8 +70,21 @@ def test():
         if data == 'n':
             args = [page_2]
         elif data != 'q':
-            raise ValueError
+            raise ParseError('"{}" is not a valid input'.format(data))
         return data, args, kwargs
+
+    def parse_2(data):
+        args, kwargs = [], {}
+        if data == 'n':
+            args = [page_3]
+        elif data != 'b':
+            raise ParseError('"{}" is not a valid input'.format(data))
+        return data, args, kwargs
+
+    def parse_3(data):
+        if data not in page_3.order:
+            raise ParseError('"{}" is not a valid input'.format(data))
+        return data, (), {}
 
     page_1 = Page('test page', '', {
             'n': Option('n', 'next page', menu.push),
@@ -91,7 +92,14 @@ def test():
         ['n', 'q'], parse_1)
 
     page_2 = Page('test page 2', '', {
-        'b': Option('b', 'back', menu.back)}, ['b'])
+            'n': Option('n', 'next page', menu.push),
+            'b': Option('b', 'back', menu.back)},
+        ['n', 'b'], parse_2)
+
+    page_3 = Page('', 'this is the 3rd test page', {
+            'b': Option('b', 'back', menu.back),
+            'h': Option('h', '1st page', menu.home)},
+        ['b', 'h'], parse_3)
 
     menu.push(page_1)
     while True:

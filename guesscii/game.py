@@ -43,24 +43,10 @@ class Game(object):
             An exception if the guess entered by the user is invalid.
         """
         for i in xrange(self._settings.attempts):
-            error = ''
-            while True:
-                guess = self._page()
-                if error:
-                    e = self._page.body.find(error)
-                    self._page.body = self._page.body[:e]
-
-                if guess == self._answer:
-                    break
-                elif guess in self._page.order:
-                    yield self._page.options[guess]
-
-                try:
-                    self._data.add_guess(guess, i)
-                    break
-                except ValueError as e:
-                    error = '\n\n'+e.args[0]
-                    self._page.body += error
+            guess = self._page()
+            if not guess and type(guess) is not str:
+                yield
+            self._data.add_guess(guess, i)
 
             hint = self._build_hint(guess)
             self._data.add_hint(hint, i)
@@ -71,7 +57,6 @@ class Game(object):
         self._page.body = self._data.__str__()
         subprocess.call('cls', shell=True)
         print self._page.body
-        yield
 
 
     #-----Private properties-----
@@ -135,9 +120,6 @@ class Game(object):
 
         Arguments:
             data ----- A string that can be parsed into a combination.
-
-        Raises:
-            A ValueError if it can't be translated.
         """
         return data.replace(' ', '')
 
