@@ -50,14 +50,25 @@ class Guesscii(object):
 
     def main(self):
         """The main loop of the game."""
+        print 'running main'
+        raw_input('> ')
         while True:
+            print type(self.__game)
+            raw_input('> ')
+            if self.__game:
+                if self._menu.pages[-1] == self.__game.main:
+                    for i in self._menu():
+                        break
             self._menu()
 
     def new_game(self):
         """Play the game with the current settings."""
         del self._game
-        self._game = Game(self._settings)
-        option = self._game.main()
+        self._game = Game(self._settings, {
+                'm': Option('m', 'menu', self._menu.back),
+                'q': Option('q', 'quit', quit)},
+            ['m', 'q'])
+        self._menu.push(self._game.main)
 
     def continue_game(self):
         """Continue the current game."""
@@ -79,10 +90,8 @@ class Guesscii(object):
         """A game instance."""
 
         # Defensive programming
-        try:
-            assert self._game is not None, AttributeError
-        except AssertionError as e:
-            raise e.args[0]
+        if not self.__game:
+            raise ValueError('There is currently no game')
 
         # Main algorithm
         return self.__game

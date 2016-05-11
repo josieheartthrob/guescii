@@ -1,6 +1,6 @@
 import string, subprocess, random
 from gamedata import Data, EXACT, SIMILAR
-from page import Page
+from page import Page, ParseError
 
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
@@ -15,7 +15,7 @@ class Game(object):
         Order is sequence of characters that represents the option order."""
 
         options = options.copy()
-        options['/g'] = lambda x: x
+        options['/g'] = lambda guess: guess.replace(' ', '')
 
         self.__settings = settings
         self.__answer = self._build_answer()
@@ -29,18 +29,11 @@ class Game(object):
 
     def main(self):
         """Run an actual game.
-        Yield an option object.
-
-        Yields:
-            An option object that's either chosen by the user entering menu commands or because the game ended. The option is essential for the game's main loop to run as intended.
 
         Side Effects:
             Meant to modify the hints, guesses and answer properties of
                 the data property.
-            Meant modify the body property of the page property.
-
-        Raises:
-            An exception if the guess entered by the user is invalid.
+            Meant to modify the body property of the page property.
         """
         for i in xrange(self._settings.attempts):
             guess = self._page()
@@ -53,10 +46,14 @@ class Game(object):
 
             self._page.body = self._data.__str__()
 
+            if guess == self._answer:
+                break
+
         self._data.answer = self._answer
         self._page.body = self._data.__str__()
         subprocess.call('cls', shell=True)
         print self._page.body
+        yield
 
 
     #-----Private properties-----
@@ -110,18 +107,17 @@ class Game(object):
         Arguments:
             data ----- a string entered by the user
         """
+        guess = data.replace(' ', '')
         if data in self._order:
             return data, (), {}
+        elif len(guess) != self._settings.length:
+            raise ParseError('Guess must be exactly ' +
+                '{} letters long'.format(self._settings.length))
+        elif not set(guess) <= set(self._settings.types):
+            raise ParseError('Guess must be composed of ' +
+                '[{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
         else:
-            return '/g', [self._data_to_guess(data)], {}
-
-    def _data_to_guess(self, data):
-        """Parse data into a combination string.
-
-        Arguments:
-            data ----- A string that can be parsed into a combination.
-        """
-        return data.replace(' ', '')
+            return '/g', [data], {}
 
 
 #------------------Testing--------------------
@@ -131,13 +127,16 @@ def test():
     from settings import Settings
     from option import Option
 
-    settings = Settings(6, 4, 5)
-    options = {'q': Option('q', 'quit', quit)}
-    game = Game(settings, options, ['q'])
-    for option in game.main():
+    def close():
         raw_input('> ')
         subprocess.call('cls', shell=True)
         quit()
+
+    settings = Settings(6, 4, 5)
+    options = {'q': Option('q', 'quit', close)}
+    game = Game(settings, options, ['q'])
+    for option in game.main():
+        close()
 
 if __name__ == '__main__':
     test()

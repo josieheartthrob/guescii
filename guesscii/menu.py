@@ -17,6 +17,9 @@ class Menu(object):
         """Create a Menu object."""
         self._pages = []
 
+    @property
+    def pages(self):
+        return self._pages[:]
 
     #-----Public methods-----
 
@@ -30,7 +33,7 @@ class Menu(object):
             Modifies the private pages property.
         """
         if not callable(page):
-            raise TypeErrror('Only callable objects can be ' +
+            raise TypeError('Only callable objects can be ' +
                              'added to the page stack.')
         self._pages.append(page)
 
