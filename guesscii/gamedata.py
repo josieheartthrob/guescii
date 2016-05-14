@@ -31,6 +31,8 @@ class Data(object):
         self._guesses = [placeholder for attempt in xrange(settings.attempts)]
         self._hints = ['' for attempt in xrange(settings.attempts)]
         self._answer = placeholder
+        self._header = self._placeholders['header'].format(
+            types=self._settings.types.replace('', ' ')[1:-1])
 
     #-----Public properties-----
 
@@ -38,6 +40,10 @@ class Data(object):
     @property
     def answer(self):
         return self._answer
+
+    @property
+    def header(self):
+        return self._header
 
 
     #-----Public methods-----
@@ -163,9 +169,7 @@ class Data(object):
     #-----Magic methods-----
 
     def __str__(self):
-        header = self._settings.types.replace('', ' ')[1:-1]
-        header = self._placeholders['header'].format(types=header)
-        s = '[{}]\n\n'.format(header)
+        s = ''
         for i, placeholder_string in enumerate(self._placeholders['guesses']):
             s += placeholder_string.format(
                 guess=self._guesses[i], seperator='|',

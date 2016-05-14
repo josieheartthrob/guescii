@@ -1,6 +1,6 @@
 import string, subprocess, random
 from gamedata import Data, EXACT, SIMILAR
-from page import Page, ParseError
+from shellpages import Page, ParseError
 
 # Global aliases
 EXACT_CHAR, SIMILAR_CHAR = EXACT, SIMILAR
@@ -15,45 +15,15 @@ class Game(object):
         Order is sequence of characters that represents the option order."""
 
         options = options.copy()
-        options['/g'] = lambda guess: guess.replace(' ', '')
+        options['/g'] = self._guess
 
         self.__settings = settings
         self.__answer = self._build_answer()
+        self.__place = 0
         self._order = order
         self._data = Data(settings)
-        self._page = Page('', self._data.__str__(),
-                           options, order, self._parse)
-
-
-    #-----Public methods-----
-
-    def main(self):
-        """Run an actual game.
-
-        Side Effects:
-            Meant to modify the hints, guesses and answer properties of
-                the data property.
-            Meant to modify the body property of the page property.
-        """
-        for i in xrange(self._settings.attempts):
-            guess = self._page()
-            if not guess and type(guess) is not str:
-                yield
-            self._data.add_guess(guess, i)
-
-            hint = self._build_hint(guess)
-            self._data.add_hint(hint, i)
-
-            self._page.body = self._data.__str__()
-
-            if guess == self._answer:
-                break
-
-        self._data.answer = self._answer
-        self._page.body = self._data.__str__()
-        subprocess.call('cls', shell=True)
-        print self._page.body
-        yield
+        self._page = Page(self._data.header, self._data.__str__(),
+                          options, order, self._parse)
 
 
     #-----Private properties-----
@@ -68,6 +38,16 @@ class Game(object):
     def _answer(self):
         """The answer combination."""
         return self.__answer
+
+    @property
+    def _place(self):
+        return self.__place
+
+    @_place.setter
+    def _place(self, other):
+        if other-self.__place != 1:
+            raise ValueError('place can only increment by 1')
+        self.__place = other
 
 
     #-----Private methods-----
@@ -108,8 +88,10 @@ class Game(object):
             data ----- a string entered by the user
         """
         guess = data.replace(' ', '')
-        if data in self._order:
+        if data in self._page.options.keys():
             return data, (), {}
+        elif self._data.answer.replace(' ', '') == self._answer:
+            raise ParseError('Game over. Please choose an option.')
         elif len(guess) != self._settings.length:
             raise ParseError('Guess must be exactly ' +
                 '{} letters long'.format(self._settings.length))
@@ -117,15 +99,38 @@ class Game(object):
             raise ParseError('Guess must be composed of ' +
                 '[{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
         else:
-            return '/g', [data], {}
+            return '/g', [guess], {}
+
+    def _guess(self, combo):
+        """Display accuracy of the given combination to the user.
+
+        Arguments:
+            combo ----- A combination string
+
+        Side Effects:
+            Modifies the private data property's answer, guesses,
+            and hints properties.
+
+            Modifies the private page property's body property.
+        """
+        self._data.add_guess(combo, self._place)
+
+        hint = self._build_hint(combo)
+        self._data.add_hint(hint, self._place)
+
+        if combo == self._answer:
+            self._data.answer = self._answer
+
+        self._page.body = self._data.__str__()
+        self._place += 1
 
 
 #------------------Testing--------------------
 
 
 def test():
+    from shellpages import Option
     from settings import Settings
-    from option import Option
 
     def close():
         raw_input('> ')
@@ -135,8 +140,8 @@ def test():
     settings = Settings(6, 4, 5)
     options = {'q': Option('q', 'quit', close)}
     game = Game(settings, options, ['q'])
-    for option in game.main():
-        close()
+    while True:
+        game._page()
 
 if __name__ == '__main__':
     test()

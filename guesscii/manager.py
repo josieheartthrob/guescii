@@ -1,8 +1,6 @@
 import random, subprocess, re
-from page import Page, ParseError
-from menu import Menu
+from shellpages import *
 from game import Game
-from option import Option
 from settings import Settings
 
 class Guesscii(object):
@@ -11,36 +9,36 @@ class Guesscii(object):
     def __init__(self):
         self.__defaults = Settings()
         self.__settings = self._defaults
-        self.__menu = Menu()
+        self.__stack = Stack()
         self._pages =  {
             'help': Page('Help', 'coming soon', {
-                'b': Option('b', 'back', self._menu.back)}, ['b']),
+                'b': Option('b', 'back', self._stack.back)}, ['b']),
             'about': Page('About', 'coming soon', {
-                'b': Option('b', 'back', self._menu.back)}, ['b']),
+                'b': Option('b', 'back', self._stack.back)}, ['b']),
             'types': Page('Change amount of letters to choose from', '', {
-                'c': Option('c', 'cancel', self._menu.back)}, ['c']),
+                'c': Option('c', 'cancel', self._stack.back)}, ['c']),
             'length': Page('Change the length of the combination', '', {
-                'c': Option('c', 'cancel', self._menu.back)}, ['c']),
+                'c': Option('c', 'cancel', self._stack.back)}, ['c']),
             'attempts': Page('Change the amount of attempts allowed', '', {
-                'c': Option('c', 'cancel', self._menu.back)}, ['c'])}
+                'c': Option('c', 'cancel', self._stack.back)}, ['c'])}
         self._pages['menu'] = Page('Menu', '', {
             'n': Option('n', 'new game', self.new_game),
             'q': Option('q', 'quit', quit),
-            's': Option('s', 'settings', self._menu.push),
-            'h': Option('h', 'help', self._menu.push),
-            'i': Option('i', 'about', self._menu.push),
+            's': Option('s', 'settings', self._stack.push),
+            'h': Option('h', 'help', self._stack.push),
+            'i': Option('i', 'about', self._stack.push),
             '\n': ''}, ['n', 'q', '\n', 's', 'h', 'i'],
             self._parse_menu)
         self._pages['settings'] = Page('Settings', '', {
             'r': Option('r', 'restore defaults', self._restore_defaults),
-            't': Option('t', 'types', self._menu.push),
-            'l': Option('l', 'length', self._menu.push),
-            'a': Option('a', 'attempts', self._menu.push),
-            'b': Option('b', 'back', self._menu.back),
+            't': Option('t', 'types', self._stack.push),
+            'l': Option('l', 'length', self._stack.push),
+            'a': Option('a', 'attempts', self._stack.push),
+            'b': Option('b', 'back', self._stack.back),
             's': Option('s', 'change all settings', self._change_settings),
             '\n': ''}, ['r', '\n', 't', 'l', 'a', '\n', 'b'],
             self._parse_settings)
-        self._menu.push(self._pages['menu'])
+        self._stack.push(self._pages['menu'])
         self.__game = None
 
     #--------------------------------------------------------------------------
@@ -56,19 +54,19 @@ class Guesscii(object):
             print type(self.__game)
             raw_input('> ')
             if self.__game:
-                if self._menu.pages[-1] == self.__game.main:
-                    for i in self._menu():
+                if self._stack.pages[-1] == self.__game.main:
+                    for i in self._stack():
                         break
-            self._menu()
+            self._stack()
 
     def new_game(self):
         """Play the game with the current settings."""
         del self._game
         self._game = Game(self._settings, {
-                'm': Option('m', 'menu', self._menu.back),
+                'm': Option('m', 'menu', self._stack.back),
                 'q': Option('q', 'quit', quit)},
             ['m', 'q'])
-        self._menu.push(self._game.main)
+        self._stack.push(self._game.main)
 
     def continue_game(self):
         """Continue the current game."""
@@ -77,8 +75,8 @@ class Guesscii(object):
     # -----Private properties-----
 
     @property
-    def _menu(self):
-        return self.__menu
+    def _stack(self):
+        return self.__stack
 
     @property
     def _options(self):
