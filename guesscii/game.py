@@ -19,7 +19,7 @@ class Game(object):
 
         self.__place = 0
 
-        self._settings = settings
+        self._settings = settings.copy()
         self._answer = self._build_answer()
         self._data = Data(settings)
 
@@ -44,6 +44,8 @@ class Game(object):
     def _place(self, other):
         if other-self.__place != 1:
             raise ValueError('place can only increment by 1')
+        elif self.__place+1 == self._settings['attempts']:
+            self._data.answer = self._answer
         self.__place = other
 
 
@@ -51,9 +53,13 @@ class Game(object):
 
     def _build_answer(self):
         """Create a randomized answer combination."""
+        # Helper Variables
+        types = string.lowercase[:self._settings['types']]
+
+        # Main algorithm
         answer = ''
         for i in xrange(self._settings['length']):
-            answer += random.choice(self._settings['types'])
+            answer += random.choice(types)
         return answer
 
     def _build_hint(self, guess):
@@ -84,7 +90,11 @@ class Game(object):
         Arguments:
             data ----- a string entered by the user
         """
+        # Helper Variables
+        types = string.lowercase[:self._settings['types']]
         guess = data.replace(' ', '')
+
+        # Main algorithm
         if data in self._page.options.keys():
             return data, (), {}
         elif self._data.answer.replace(' ', '') == self._answer:
@@ -92,9 +102,9 @@ class Game(object):
         elif len(guess) != self._settings['length']:
             raise ParseError('Guess must be exactly ' +
                 '{} letters long'.format(self._settings['length']))
-        elif not set(guess) <= set(self._settings['types']):
+        elif not set(guess) <= set(types):
             raise ParseError('Guess must be composed of ' +
-                '[{}]'.format(self._settings['types'].replace('', ' ')[1:-1]))
+                '[{}]'.format(types.replace('', ' ')[1:-1]))
         else:
             return '/g', [guess], {}
 
@@ -118,8 +128,8 @@ class Game(object):
         if combo == self._answer:
             self._data.answer = self._answer
 
-        self._page.body = self._data.__str__()
         self._place += 1
+        self._page.body = self._data.__str__()
 
 
 #------------------Testing--------------------
@@ -127,14 +137,13 @@ class Game(object):
 
 def test():
     from shellpages import Option
-    from settings import Settings
 
     def close():
         raw_input('> ')
         subprocess.call('cls', shell=True)
         quit()
 
-    settings = Settings(6, 4, 5)
+    settings = {'types': 6, 'length': 4, 'attempts': 5}
     options = {'q': Option('q', 'quit', close)}
     game = Game(settings, options, ['q'])
     while True:

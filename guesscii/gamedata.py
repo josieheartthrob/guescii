@@ -1,3 +1,5 @@
+from string import lowercase
+
 # Global variables
 EXACT = 'x'
 SIMILAR = 'o'
@@ -23,16 +25,18 @@ class Data(object):
             add_hint ------ Add a hint to the list of hints.
         """
         # Helper variables
-        placeholder = (" _"*settings.length)[1:]
+        placeholder = (" _"*settings['length'])[1:]
+        letters = lowercase[:settings['types']]
 
         # Initialize attributes
         self.__settings = settings
         self.__placeholders = self._build_placeholders()
-        self._guesses = [placeholder for attempt in xrange(settings.attempts)]
-        self._hints = ['' for attempt in xrange(settings.attempts)]
+        self._guesses = [placeholder for attempt in xrange(
+            settings['attempts'])]
+        self._hints = ['' for attempt in xrange(settings['attempts'])]
         self._answer = placeholder
         self._header = self._placeholders['header'].format(
-            types=self._settings.types.replace('', ' ')[1:-1])
+            types=letters.replace('', ' ')[1:-1])
 
     #-----Public properties-----
 
@@ -104,8 +108,8 @@ class Data(object):
         #   mini-language
 
         # Helper variables
-        types = len(self._settings.types)
-        length = self._settings.length
+        types = self._settings['types']
+        length = self._settings['length']
         guess_strings = ('guess: >{}', 'seperator: >{}', 'hint: >{}')
 
         # Derived Helper variables
@@ -116,7 +120,7 @@ class Data(object):
         # Main algorithm
         header = self._build_placeholder(['types: ^{}'], space)
         guesses = [self._build_placeholder(guess_strings, space) for
-                   attempt in xrange(self._settings.attempts)]
+                   attempt in xrange(self._settings['attempts'])]
         answer = self._build_placeholder(['answer: >{}'], space)
 
         placeholders = {'header': header, 'guesses': guesses,
@@ -131,7 +135,7 @@ class Data(object):
             space ------- An int as the amount of spaces to buffer with.
         """
         # Helper variables
-        types = len(self._settings.types)
+        types = self._settings['types']
 
         # Main algorithm
         s = ''
@@ -140,11 +144,11 @@ class Data(object):
                 space = (types*2)-1 + space
             elif (placeholder.find('guess') >= 0 or
                     placeholder.find('answer') >= 0):
-                space = (self._settings.length*2)-1 + space
+                space = (self._settings['length']*2)-1 + space
             elif placeholder.find('seperator') >= 0:
                 space = 6
             elif placeholder.find('hint') >= 0:
-                space = self._settings.length+2
+                space = self._settings['length']+2
             elif placeholder.find('answer') >=  0:
                 space = space
             else:
@@ -182,18 +186,19 @@ class Data(object):
     #-----Error checking methods-----
 
     def _check_combo(self, combo):
+        types = lowercase[:self._settings['types']]
         if type(combo) is not str:
             raise TypeError('{} must be a combination string.'.format(combo))
         combo = combo.replace(' ', '')
-        if len(combo) != self._settings.length:
+        if len(combo) != self._settings['length']:
             raise ValueError(
                 '{} must be exactly '.format(combo) +
-                '{} characters long.'.format(self._settings.length))
+                '{} characters long.'.format(self._settings['length']))
         for c in set(combo):
-            if c not in self._settings.types+'_':
+            if c not in types+'_':
                 raise ValueError(
                     '{} must be composed of ['.format(combo) +
-                    '{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
+                    '{}]'.format(types.replace('', ' ')[1:-1]))
 
     def _check_hint(self, hint):
         for c in set(hint):
@@ -201,10 +206,10 @@ class Data(object):
                 raise ValueError(
                     '{} must be composed of ['.format(hint) +
                     '{}, {}]'.format(EXACT, SIMILAR))
-        if len(hint) > self._settings.length:
+        if len(hint) > self._settings['length']:
             raise ValueError(
                 '{} must be <= '.format(hint) +
-                '{} character long.'.format(self._settings.length))
+                '{} character long.'.format(self._settings['length']))
 
 
 #-----------------------------------------------------------------------------
