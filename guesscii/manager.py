@@ -22,7 +22,7 @@ class Guesscii(object):
             'attempts': Page('Change the amount of attempts allowed', '', {
                 'c': Option('c', 'cancel', self._stack.back)}, ['c'])}
         self._pages['menu'] = Page('Menu', '', {
-            'n': Option('n', 'new game', self.new_game),
+            'n': Option('n', 'new game', self._stack.push),
             'q': Option('q', 'quit', quit),
             's': Option('s', 'settings', self._stack.push),
             'h': Option('h', 'help', self._stack.push),
@@ -48,25 +48,8 @@ class Guesscii(object):
 
     def main(self):
         """The main loop of the game."""
-        print 'running main'
-        raw_input('> ')
         while True:
-            print type(self.__game)
-            raw_input('> ')
-            if self.__game:
-                if self._stack.pages[-1] == self.__game.main:
-                    for i in self._stack():
-                        break
             self._stack()
-
-    def new_game(self):
-        """Play the game with the current settings."""
-        del self._game
-        self._game = Game(self._settings, {
-                'm': Option('m', 'menu', self._stack.back),
-                'q': Option('q', 'quit', quit)},
-            ['m', 'q'])
-        self._stack.push(self._game.main)
 
     def continue_game(self):
         """Continue the current game."""
@@ -113,12 +96,12 @@ class Guesscii(object):
 
         Modify the game property."""
 
-        # Polymorphic defensive programming
-        try:
-            assert hasattr(game, 'main'), TypeError
-            assert callable(game.main), AttributeError
-        except AssertionError as e:
-            raise e.args[0]
+        # Defensive programming
+        if not hasattr(game, 'page'):
+            raise TypeError('The game must have a page property.')
+        elif not callable(game.page):
+            raise AttributeError("The game's page property must be" +
+                                 " a callable object")
 
         # Main algorithm
         self.__game = game
@@ -154,7 +137,16 @@ class Guesscii(object):
 
     def _parse_menu(self, data):
         args, kwargs = (), {}
-        if data == 's':
+        if data == 'n':
+            del self._game
+            self._game = Game(self._settings, {
+                'm': Option('m', 'menu', self._stack.back),
+                'q': Option('q', 'quit', quit)},
+            ['m', 'q'])
+            args = [self._game.page]
+        elif data == 'c':
+            args = [self._game.page]
+        elif data == 's':
             args = [self._pages['settings']]
         elif data == 'h':
             args = [self._pages['help']]
@@ -177,6 +169,29 @@ class Guesscii(object):
         elif data not in self._pages['settings'].order:
             raise ParseError
         return data, args, kwargs
+
+    def _parse_types(self, data):
+        self._parse_setting('t', data)
+
+    def _parse_length(self, data):
+        self._parse_setting('l', data)
+
+    def _parse_attempts(self, data):
+        self._parse_setting('a', data)
+
+    def _parse_setting(self, setting, data):
+        t = len(self._settings.types)
+        L = self._settings.length
+        a = self._settings.attempts
+        args, kwargs = (), {}
+        if data != 'c':
+            try:
+                data = int(data)
+            except ValueError:
+                raise ParseError('Please enter a positive integer.')
+        if setting == 't':
+        elif setting == 'l':
+        elif setting == 'a':
 
     def _restore_defaults(self):
         self._settings = self._defaults

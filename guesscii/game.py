@@ -17,27 +17,24 @@ class Game(object):
         options = options.copy()
         options['/g'] = self._guess
 
-        self.__settings = settings
-        self.__answer = self._build_answer()
         self.__place = 0
-        self._order = order
+
+        self._settings = settings
+        self._answer = self._build_answer()
         self._data = Data(settings)
+
         self._page = Page(self._data.header, self._data.__str__(),
                           options, order, self._parse)
 
 
+    #-----Public properties-----
+
+    @property
+    def page(self):
+        return self._page
+
+
     #-----Private properties-----
-
-    # Immutable
-    @property
-    def _settings(self):
-        """The settings used to create the game."""
-        return self.__settings
-
-    @property
-    def _answer(self):
-        """The answer combination."""
-        return self.__answer
 
     @property
     def _place(self):
@@ -55,8 +52,8 @@ class Game(object):
     def _build_answer(self):
         """Create a randomized answer combination."""
         answer = ''
-        for i in xrange(self._settings.length):
-            answer += random.choice(self._settings.types)
+        for i in xrange(self._settings['length']):
+            answer += random.choice(self._settings['types'])
         return answer
 
     def _build_hint(self, guess):
@@ -92,12 +89,12 @@ class Game(object):
             return data, (), {}
         elif self._data.answer.replace(' ', '') == self._answer:
             raise ParseError('Game over. Please choose an option.')
-        elif len(guess) != self._settings.length:
+        elif len(guess) != self._settings['length']:
             raise ParseError('Guess must be exactly ' +
-                '{} letters long'.format(self._settings.length))
-        elif not set(guess) <= set(self._settings.types):
+                '{} letters long'.format(self._settings['length']))
+        elif not set(guess) <= set(self._settings['types']):
             raise ParseError('Guess must be composed of ' +
-                '[{}]'.format(self._settings.types.replace('', ' ')[1:-1]))
+                '[{}]'.format(self._settings['types'].replace('', ' ')[1:-1]))
         else:
             return '/g', [guess], {}
 
