@@ -1,8 +1,11 @@
 from string import lowercase
 
 # Global variables
-EXACT = 'x'
-SIMILAR = 'o'
+
+# changed the exact and similar character to hopefully comunicate
+#   their meaning better
+EXACT = '='
+SIMILAR = '~'
 
 class Data(object):
     """A class that contains all the information to repreent the game. Printing an instance of the class will print the game."""
@@ -127,6 +130,9 @@ class Data(object):
                         'answer': answer, 'seperator': '_'*full+'\n\n'}
         return placeholders
 
+    # Bug fixes:
+    #   Implemented a constant so the space variable doesn't increment
+    #   Temporary fix for the seperator buffer; adds two spaces
     def _build_placeholder(self, strings, space):
         """Return a buffered placeholder string.
 
@@ -136,17 +142,19 @@ class Data(object):
         """
         # Helper variables
         types = self._settings['types']
+        space_constant = space
 
         # Main algorithm
         s = ''
         for placeholder in strings:
+            space = space_constant
             if placeholder.find('types') >= 0:
                 space = (types*2)-1 + space
             elif (placeholder.find('guess') >= 0 or
                     placeholder.find('answer') >= 0):
                 space = (self._settings['length']*2)-1 + space
             elif placeholder.find('seperator') >= 0:
-                space = 6
+                space = space+2
             elif placeholder.find('hint') >= 0:
                 space = self._settings['length']+2
             elif placeholder.find('answer') >=  0:
@@ -215,9 +223,9 @@ class Data(object):
 #-----------------------------------------------------------------------------
 
 
+# Implmented settings dictionary
 def test():
     import subprocess
-    from settings import Settings
 
     def clear():
         raw_input('> ')
@@ -233,7 +241,7 @@ def test():
             print hint
         clear()
 
-    data = Data(Settings())
+    data = Data({'types': 6, 'length': 4, 'attempts': 6})
     print data
     clear()
 

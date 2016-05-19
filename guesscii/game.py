@@ -102,7 +102,7 @@ class Game(object):
         elif len(guess) != self._settings['length']:
             raise ParseError('Guess must be exactly ' +
                 '{} letters long'.format(self._settings['length']))
-        elif not set(guess) <= set(types):
+        elif not set(guess).issubset(set(types)): # Implemented standards
             raise ParseError('Guess must be composed of ' +
                 '[{}]'.format(types.replace('', ' ')[1:-1]))
         else:

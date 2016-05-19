@@ -1,29 +1,42 @@
-import random, subprocess, re
+# Imported string as part of the new_game function
+import random, subprocess, re, string
 from shellpages import *
 from game import Game
-from settings import Settings
 
 class Guesscii(object):
     """The main class that handles the program."""
 
     def __init__(self):
-        self.__defaults = Settings()
+        # Implemented settings dictionary
+        self.__defaults = {'types': 6, 'length': 4, 'attempts': 10}
         self.__settings = self._defaults
         self.__stack = Stack()
+
+        # Implemented parse functions
         self._pages =  {
             'help': Page('Help', 'coming soon', {
-                'b': Option('b', 'back', self._stack.back)}, ['b']),
+                'b': Option('b', 'back', self._stack.back)}, ['b'],
+                self._default_parse),
             'about': Page('About', 'coming soon', {
-                'b': Option('b', 'back', self._stack.back)}, ['b']),
+                'b': Option('b', 'back', self._stack.back)}, ['b'],
+                self._default_parse),
             'types': Page('Change amount of letters to choose from', '', {
-                'c': Option('c', 'cancel', self._stack.back)}, ['c']),
+                    '/s': self._change_settings,
+                    'c': Option('c', 'cancel', self._stack.back)},
+                ['c'], self._parse_types),
             'length': Page('Change the length of the combination', '', {
-                'c': Option('c', 'cancel', self._stack.back)}, ['c']),
+                    '/s': self._change_settings,
+                    'c': Option('c', 'cancel', self._stack.back)},
+                ['c'], self._parse_length),
             'attempts': Page('Change the amount of attempts allowed', '', {
-                'c': Option('c', 'cancel', self._stack.back)}, ['c'])}
+                    '/s': self._change_settings,
+                    'c': Option('c', 'cancel', self._stack.back)},
+                ['c'], self._parse_attempts)}
+
+        # Implemented new_game and close functions
         self._pages['menu'] = Page('Menu', '', {
-            'n': Option('n', 'new game', self._stack.push),
-            'q': Option('q', 'quit', quit),
+            'n': Option('n', 'new game', self._new_game),
+            'q': Option('q', 'quit', close),
             's': Option('s', 'settings', self._stack.push),
             'h': Option('h', 'help', self._stack.push),
             'i': Option('i', 'about', self._stack.push),
@@ -51,9 +64,7 @@ class Guesscii(object):
         while True:
             self._stack()
 
-    def continue_game(self):
-        """Continue the current game."""
-        option = self._game.main()
+    # Deleted current continue_game function
 
     # -----Private properties-----
 
@@ -116,14 +127,18 @@ class Guesscii(object):
         """Assumes settings is a settings object.
 
         Modify the current settings."""
-
-        # Polymorphic defensive programming
-        try:
-            assert False, NotImplementedError
-        except AssertionError as e:
-            raise e.args[0]
-
-        # Main algorithm
+        # Implemented settings dictionary
+        for attribute in ('iteritems', 'keys'):
+            if not hasattr(settings, attribute):
+                raise TypeError('{} must be a dictionary.'.format(
+                    type(settings)))
+        if not {'types', 'length', 'attempts'}.issubset(set(settings.keys())):
+            raise ValueError('{} must be a settings dictionary.'.format(
+                settings))
+        for value in settings.values():
+            if type(value) is not int:
+                raise ValueError('{} must be a settings dictionary.'.format(
+                    settings))
         self.__settings = settings
 
     @_options.setter
@@ -137,14 +152,9 @@ class Guesscii(object):
 
     def _parse_menu(self, data):
         args, kwargs = (), {}
-        if data == 'n':
-            del self._game
-            self._game = Game(self._settings, {
-                'm': Option('m', 'menu', self._stack.back),
-                'q': Option('q', 'quit', quit)},
-            ['m', 'q'])
-            args = [self._game.page]
-        elif data == 'c':
+
+        # Implemented new_game function
+        if data == 'c':
             args = [self._game.page]
         elif data == 's':
             args = [self._pages['settings']]
@@ -170,47 +180,93 @@ class Guesscii(object):
             raise ParseError
         return data, args, kwargs
 
+    # Implmented a single abstract parse function for all settings changes
     def _parse_types(self, data):
-        self._parse_setting('t', data)
+        return self._parse_setting('t', data)
 
     def _parse_length(self, data):
-        self._parse_setting('l', data)
+        return self._parse_setting('l', data)
 
     def _parse_attempts(self, data):
-        self._parse_setting('a', data)
+        return self._parse_setting('a', data)
 
+    # Moved setting-limits from change_settings to parse_settings
     def _parse_setting(self, setting, data):
-        t = len(self._settings.types)
-        L = self._settings.length
-        a = self._settings.attempts
+        # Helper Variables
+        maximums = {'t': 30, 'l': 20, 'a': 100}
+
+        t = self._settings['types']
+        L = self._settings['length']
+        a = self._settings['attempts']
+
+        # Main algorithm
         args, kwargs = (), {}
+
         if data != 'c':
             try:
                 data = int(data)
             except ValueError:
                 raise ParseError('Please enter a positive integer.')
-        if setting == 't':
-        elif setting == 'l':
-        elif setting == 'a':
+            if data > maximums[setting]:
+                raise ParseError('{} must be less than {}'.format(
+                    key, maximums[settings]))
+            elif data < 2:
+                raise ParseError('{} must be greater than 1'.format(key))
 
-    def _restore_defaults(self):
-        self._settings = self._defaults
+            # Implemented algorithm to use change_settings function
+            if setting == 't':
+                t = data
+            elif setting == 'l':
+                L = data
+            elif setting == 'a':
+                a = data
 
+            data, args = '/s', ['t:{} l:{} a:{}'.format(t, L, a)]
+
+        return data, args, kwargs
+
+    # Bug fix: Implemented a 'character map'
     def _change_settings(self, data):
         # Helper variables
-        maximums = {'t': 30, 'l': 20, 'a': 100}
+        character_map = {'t': 'types', 'l': 'length', 'a': 'attempts'}
         pattern = re.compile(r'[tla]\W*\d+')
 
         # Main algorithm
         settings = {}
         for setting in re.findall(pattern, data):
-            key = settings[0]
-            settings[key] = int(re.findall(r'\d+', setting))
-            if settings[key] > maximums[key]:
-                raise ValueError
-        settings = Settings(types=settings['t'],
-            length=settings['l'], attempts=settings['a'])
+            key = character_map[setting[0]]
+            settings[key] = int(re.findall(r'\d+', setting)[0])
+
+        # Implemented settings dictionary
         self._settings = settings
+        raw_input('Settings saved. \n\n> ')
+
+    # Bug fix: Implemented parse function
+    def _default_parse(self, data):
+        if data != 'b':
+            raise ParseError('Invalid input. Please enter an option.')
+        return data, (), {}
+
+    # Rearranged the placement
+    def _restore_defaults(self):
+        self._settings = self._defaults
+
+    # Implemented new function that handles creating a new game
+    def _new_game(self):
+        if (self._stack[-1].title.replace(' ', '') ==
+                string.lowercase[:self._settings['types']]):
+            self._stack.back()
+        del self._game
+        self._game = Game(self._settings, {
+            'n': Option('n', 'new game', self._new_game),
+            'm': Option('m', 'menu', self._stack.back),
+            'q': Option('q', 'quit', close)}, ['n', 'm', 'q'])
+        self._stack.push(self._game.page)
+
+# Implemented new function to clear the screen when the game is quit
+def close():
+    subprocess.call('cls', shell=True)
+    quit()
 
 if __name__ == '__main__':
     guesscii = Guesscii()
